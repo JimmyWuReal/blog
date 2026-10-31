@@ -32,6 +32,8 @@ Text starts here. The page's title comes from `title`, so don't repeat it as a `
 
 The note's URL is its path: `notes/graph/dijkstra.md` → `cp.jimmywu.app/graph/dijkstra`.
 
+Each note also gets a link-preview (Open Graph) image at `/og/graph/dijkstra.png`, made at build time from its title, section, tags, and difficulty. The preview text is the note's first paragraph.
+
 ### Markdown
 
 Notes are written the way they were on HackMD:

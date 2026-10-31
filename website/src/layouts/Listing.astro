@@ -5,12 +5,14 @@ import { getNotebook } from '../lib/notebook';
 
 interface Props {
   title?: string;
+  /** Open Graph image path; defaults to the contents page's. */
+  image?: string;
 }
 
 const notebook = await getNotebook();
 ---
 
-<Base title={Astro.props.title}>
+<Base title={Astro.props.title} image={Astro.props.image}>
   <div class="mx-auto max-w-[760px] px-4 pt-8 pb-24 sm:px-10">
     <a href="/" class="text-[15px] font-semibold tracking-[-0.035em] text-[#efefef] no-underline">{notebook.title}</a>
     <main class="mt-16 sm:mt-20">

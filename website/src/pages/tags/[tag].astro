@@ -12,7 +12,7 @@ const { tag } = Astro.params;
 const { notes } = Astro.props;
 ---
 
-<Listing title={tag}>
+<Listing title={tag} image={`/og/tags/${encodeURIComponent(tag)}.png`}>
   <h1 class="m-0 text-[32px] leading-[1.15] font-medium tracking-[-0.045em] sm:text-[36px]">{tag}</h1>
   <p class="mt-3 text-[14px] text-[#7d7d7d]">{notes.length} {notes.length === 1 ? 'note' : 'notes'}</p>
   <div class="mt-8"><NoteList items={notes} /></div>
