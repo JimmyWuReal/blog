@@ -1,0 +1,28 @@
+---
+// A note's tags and difficulty from its frontmatter. Renders nothing if it has neither.
+import type { Note } from '../lib/notebook';
+
+interface Props {
+  note: Note;
+}
+
+const { tags, difficulty } = Astro.props.note.data;
+---
+
+{
+  (tags.length > 0 || difficulty) && (
+    <div class="flex flex-wrap items-center gap-2">
+      {tags.map((tag) => (
+        <a class="tag" href={`/tags/${encodeURIComponent(tag)}`}>
+          {tag}
+        </a>
+      ))}
+      {difficulty && (
+        <span class="mono-value ml-1" title="Difficulty, 1 (easiest) to 10">
+          <span class="text-[#6f6f6f]">Difficulty </span>
+          {difficulty}/10
+        </span>
+      )}
+    </div>
+  )
+}

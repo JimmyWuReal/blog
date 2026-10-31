@@ -1,0 +1,20 @@
+---
+// Single-column page for the contents, tag, and 404 pages.
+import Base from './Base.astro';
+import { getNotebook } from '../lib/notebook';
+
+interface Props {
+  title?: string;
+}
+
+const notebook = await getNotebook();
+---
+
+<Base title={Astro.props.title}>
+  <div class="mx-auto max-w-[760px] px-4 pt-8 pb-24 sm:px-10">
+    <a href="/" class="text-[15px] font-semibold tracking-[-0.035em] text-[#efefef] no-underline">{notebook.title}</a>
+    <main class="mt-16 sm:mt-20">
+      <slot />
+    </main>
+  </div>
+</Base>

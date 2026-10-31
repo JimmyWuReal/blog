@@ -1,0 +1,22 @@
+---
+// Contents: every section and note from notebook.yml.
+import Listing from '../layouts/Listing.astro';
+import NoteList from '../components/NoteList.astro';
+import { getNotebook } from '../lib/notebook';
+
+const notebook = await getNotebook();
+---
+
+<Listing>
+  <h1 class="m-0 text-[32px] leading-[1.15] font-medium tracking-[-0.045em] sm:text-[36px]">Contents</h1>
+  <div class="mt-10 flex flex-col gap-10">
+    {
+      notebook.sections.map((section) => (
+        <section>
+          <h2 class="m-0 mb-2 text-[18px] font-medium tracking-[-0.02em]">{section.title}</h2>
+          <NoteList items={section.items} />
+        </section>
+      ))
+    }
+  </div>
+</Listing>

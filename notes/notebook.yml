@@ -1,0 +1,45 @@
+# The notebook's structure: sections, their order, and the notes in each.
+#
+# - `title` is the notebook name shown in the sidebar and browser tab.
+# - Each section has a `section` name and a list of `notes`.
+# - A note is its path inside notes/, without `.md` (math/fast-power → notes/math/fast-power.md).
+#   The path is also its URL: cp.jimmywu.app/math/fast-power
+# - A section can contain sub-sections, written the same way.
+#
+# Every note must be listed exactly once. The build fails and says why if a note is
+# missing here, listed twice, or listed but has no file.
+
+title: Competitive Programming
+
+sections:
+  - section: Introduction
+    notes:
+      - introduction/hello-world
+      - introduction/competitive-programming
+      - introduction/high-school-contests
+      - introduction/resources
+
+  - section: Basics
+    notes:
+      - basics/starting-template
+      - basics/complexity
+      - basics/input
+      - basics/stl
+
+  - section: String
+    notes:
+      - string/substr
+
+  - section: Math
+    notes:
+      - math/fast-power
+      - section: 矩陣
+        notes:
+          - math/matrix-multiplication
+          - math/matrix-fast-power
+
+  - section: Other
+    notes:
+      - other/credits
+      - other/copyright
+      - other/progress

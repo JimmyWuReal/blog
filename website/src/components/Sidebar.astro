@@ -1,0 +1,22 @@
+---
+import { getNotebook } from '../lib/notebook';
+import NavTree from './NavTree.astro';
+
+interface Props {
+  currentId?: string;
+}
+
+const notebook = await getNotebook();
+const { currentId } = Astro.props;
+---
+
+<nav aria-label="Notebook" class="flex flex-col gap-6">
+  {
+    notebook.sections.map((section) => (
+      <div class="flex flex-col gap-1">
+        <p class="nav-section">{section.title}</p>
+        <NavTree items={section.items} currentId={currentId} />
+      </div>
+    ))
+  }
+</nav>

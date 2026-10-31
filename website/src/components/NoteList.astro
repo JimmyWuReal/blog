@@ -1,0 +1,31 @@
+---
+// Note titles with their tags and difficulty, for the contents and tag pages.
+import { isSection, noteUrl, type Item } from '../lib/notebook';
+import NoteMeta from './NoteMeta.astro';
+
+interface Props {
+  items: Item[];
+}
+
+const { items } = Astro.props;
+---
+
+<ul class="flex flex-col">
+  {
+    items.map((item) =>
+      isSection(item) ? (
+        <li class="mt-4 mb-1">
+          <p class="mb-1 text-[13px] font-medium text-[#6f6f6f]">{item.title}</p>
+          <Astro.self items={item.items} />
+        </li>
+      ) : (
+        <li class="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 py-2">
+          <a class="text-[15px] font-medium text-[#e6e6e6] no-underline hover:text-white" href={noteUrl(item)}>
+            {item.data.title}
+          </a>
+          <NoteMeta note={item} />
+        </li>
+      ),
+    )
+  }
+</ul>

@@ -1,0 +1,26 @@
+---
+import '../styles/global.css';
+import { getNotebook } from '../lib/notebook';
+
+interface Props {
+  /** Page title; the notebook title is appended. Omit on the home page. */
+  title?: string;
+}
+
+const notebook = await getNotebook();
+const { title } = Astro.props;
+---
+
+<!doctype html>
+<html lang="zh-Hant">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="canonical" href={new URL(Astro.url.pathname, Astro.site)} />
+    <title>{title ? `${title} · ${notebook.title}` : notebook.title}</title>
+  </head>
+  <body>
+    <slot />
+  </body>
+</html>

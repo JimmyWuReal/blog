@@ -1,0 +1,56 @@
+/* Rendered note markdown: HackMD's reading layout in the UI kit's type and surfaces. */
+.note { font-size: 15px; line-height: 1.85; color: #b8b8b8; overflow-wrap: break-word; }
+.note > :first-child { margin-top: 0; }
+.note :is(p, ul, ol, blockquote, pre, table, .code-block, .katex-display) { margin: 0 0 18px; }
+
+.note :is(h1, h2, h3, h4, h5, h6) { color: #fff; font-weight: 500; scroll-margin-top: 24px; }
+.note h1 { margin: 56px 0 18px; font-size: 30px; line-height: 1.2; letter-spacing: -0.035em; }
+.note h2 { margin: 52px 0 16px; font-size: 24px; line-height: 1.3; letter-spacing: -0.03em; }
+.note h3 { margin: 36px 0 12px; font-size: 18px; line-height: 1.4; letter-spacing: -0.02em; }
+.note :is(h4, h5, h6) { margin: 28px 0 10px; font-size: 15px; font-weight: 600; }
+
+.note strong { color: #fff; font-weight: 600; }
+.note a { color: #fff; text-decoration: underline; text-decoration-color: var(--line-hover); text-underline-offset: 3px; }
+.note a:hover { text-decoration-color: #fff; }
+
+.note :is(ul, ol) { padding-left: 1.5em; }
+.note ul { list-style: disc; }
+.note ol { list-style: decimal; }
+.note ul ul { list-style-type: circle; }
+.note li { margin: 4px 0; }
+.note li > :is(ul, ol) { margin: 4px 0 0; }
+.note li::marker { color: var(--dim); }
+
+/* A note's `---` is the author's own separator, so it stays as a quiet line. */
+.note hr { margin: 36px 0; border: 0; height: 1px; background: var(--rule); }
+
+.note blockquote { padding: 14px 18px; border-radius: 12px; background: #111; color: #9a9a9a; }
+.note blockquote > :last-child { margin-bottom: 0; }
+.note blockquote :is(pre, code) { background: #161616 !important; }
+
+.note img { max-width: 100%; border-radius: 12px; }
+
+.note table { display: block; overflow-x: auto; border-collapse: collapse; font-size: 14px; }
+.note :is(th, td) { padding: 8px 14px; border: 1px solid var(--rule); text-align: left; }
+.note th { color: #fff; font-weight: 500; }
+
+/* Inline code */
+.note :not(pre) > code { padding: 2px 6px; border-radius: 6px; background: #161616; color: #e2e2e2; font-family: var(--font-mono); font-size: 0.86em; }
+
+/* Code blocks: Shiki colors on the kit's card surface. */
+.code-block { position: relative; }
+.code-block > pre { margin: 0; }
+.note pre { padding: 16px 18px; border-radius: 12px; background: #111 !important; overflow-x: auto; font: 400 13px/1.7 var(--font-mono); tab-size: 4; }
+.note pre code { font: inherit; }
+.has-line-numbers code { counter-reset: line var(--line-start, 0); }
+.has-line-numbers .line::before { counter-increment: line; content: counter(line); display: inline-block; width: 2.5ch; margin-right: 18px; text-align: right; color: #4d4d4d; user-select: none; }
+
+/* Copy button: shown on hover / focus, always on touch screens. */
+.code-copy { position: absolute; top: 10px; right: 10px; opacity: 0; }
+.code-block:hover .code-copy, .code-copy:focus-within, .code-copy.is-shown { opacity: 1; }
+.code-copy .icon-button { background: #111; }
+@media (hover: none) { .code-copy { opacity: 1; } }
+
+/* Math */
+.note .katex { font-size: 1.1em; color: #e6e6e6; }
+.note .katex-display { overflow-x: auto; overflow-y: hidden; padding: 4px 0; }
