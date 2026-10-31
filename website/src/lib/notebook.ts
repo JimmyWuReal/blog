@@ -66,7 +66,19 @@ export async function getTags() {
 /** The note's opening text as plain text, for link previews. Empty if it opens with code or a heading. */
 export function noteDescription(note: Note, max = 150) {
   const paragraph = (note.body ?? '').trim().split(/\n\s*\n/)[0] ?? '';
-  if (/^(#|```|\$\$|\||>|<)/.test(paragraph)) return '';
+  return isProse(paragraph) ? plainText(paragraph, max) : '';
+}
+
+/** The note's first prose paragraph as plain text, skipping headings and code, for note cards. */
+export function notePreview(note: Note, max = 110) {
+  const body = (note.body ?? '').replace(/^```[\s\S]*?^```/gm, '').replace(/^\$\$[\s\S]*?\$\$/gm, '');
+  const paragraph = body.trim().split(/\n\s*\n/).find(isProse) ?? '';
+  return plainText(paragraph, max);
+}
+
+const isProse = (paragraph: string) => paragraph !== '' && !/^(#|```|\$\$|\||>|<|-{3,}\s*$)/.test(paragraph);
+
+function plainText(paragraph: string, max: number) {
   const text = paragraph
     .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
     .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')

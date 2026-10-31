@@ -1,0 +1,45 @@
+---
+// Note cards with a short preview, tags, and difficulty, for the contents and tag pages.
+// Sub-sections get their own heading and grid.
+import { isSection, notePreview, noteUrl, type Item, type Note } from '../lib/notebook';
+import NoteMeta from './NoteMeta.astro';
+
+interface Props {
+  items: Item[];
+}
+
+const { items } = Astro.props;
+const notes = items.filter((item): item is Note => !isSection(item));
+const sections = items.filter(isSection);
+---
+
+<div class="flex flex-col gap-8">
+  {
+    notes.length > 0 && (
+      <ul class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
+        {notes.map((note) => {
+          const preview = notePreview(note);
+          return (
+            <li class="relative flex flex-col gap-2 rounded-2xl bg-[#111] p-5 hover:bg-[#161616]">
+              <a href={noteUrl(note)} class="text-[15px] font-medium tracking-[-0.01em] text-[#efefef] no-underline after:absolute after:inset-0 after:rounded-2xl">
+                {note.data.title}
+              </a>
+              {preview && <p class="m-0 line-clamp-2 text-[12.5px] leading-[1.7] text-[#7d7d7d]">{preview}</p>}
+              <div class="relative mt-auto pt-2 empty:hidden">
+                <NoteMeta note={note} />
+              </div>
+            </li>
+          );
+        })}
+      </ul>
+    )
+  }
+  {
+    sections.map((section) => (
+      <section class="flex flex-col gap-4">
+        <h3 class="m-0 text-[13px] font-medium text-[#6f6f6f]">{section.title}</h3>
+        <Astro.self items={section.items} />
+      </section>
+    ))
+  }
+</div>
