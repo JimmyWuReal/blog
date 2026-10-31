@@ -78,3 +78,7 @@ Cloudflare build settings:
 - Node.js version: `24`, from `website/.nvmrc`
 
 `cp.jimmywu.app` is set up under the Pages project's **Custom domains** tab. Cloudflare manages its DNS record and HTTPS certificate.
+
+- Custom domain: https://cp.jimmywu.app
+- Cloudflare hostname: https://cp-note-nfn.pages.dev
+- [Cloudflare project](https://dash.cloudflare.com/3573cf391dd2d9dc99966427952b98ee/pages/view/cp-note)
