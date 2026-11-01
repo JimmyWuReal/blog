@@ -22,21 +22,11 @@ sections:
   - section: Basics
     notes:
       - basics/starting-template
-      - basics/complexity
       - basics/input
-      - basics/stl
-
-  - section: String
-    notes:
-      - string/substr
 
   - section: Math
     notes:
       - math/fast-power
-      - section: 矩陣
-        notes:
-          - math/matrix-multiplication
-          - math/matrix-fast-power
 
   - section: Solutions
     notes:
@@ -46,4 +36,3 @@ sections:
     notes:
       - other/credits
       - other/copyright
-      - other/progress
