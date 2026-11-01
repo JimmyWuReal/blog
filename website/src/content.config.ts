@@ -12,6 +12,10 @@ const notes = defineCollection({
   }),
   schema: z.object({
     title: z.string(),
+    // Shown on note cards and in link previews. Defaults to the note's first paragraph.
+    description: z.string().optional(),
+    // `date: 2026-11-01`. Shown on note cards.
+    date: z.coerce.date().optional(),
     // `tags: [math, dp]`, or a single `tags: math`.
     tags: z
       .union([z.string(), z.array(z.string())])
