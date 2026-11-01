@@ -22,6 +22,7 @@ export const noteUrl = (note: Note) => `/${note.id}`;
 
 // Cached for the build; reloaded on every request in dev so edits show up.
 let cached: Promise<Notebook> | undefined;
+let draftsLogged = false;
 export const getNotebook = () => (import.meta.env.DEV ? load() : (cached ??= load()));
 
 async function load(): Promise<Notebook> {
@@ -45,8 +46,12 @@ async function load(): Promise<Notebook> {
   });
 
   const sections = (raw.sections ?? []).map((section) => toSection(section));
-  for (const id of notes.keys()) {
-    if (!order.some((note) => note.id === id)) problems.push(`notes/${id}.md is not listed.`);
+  // Notes left out of notebook.yml are drafts: they get no page. Say which, so a
+  // forgotten note doesn't go unnoticed.
+  const drafts = [...notes.keys()].filter((id) => !order.some((note) => note.id === id));
+  if (drafts.length && !draftsLogged) {
+    draftsLogged = true;
+    console.info(`Unlisted notes (drafts, not built):\n- ${drafts.map((id) => `notes/${id}.md`).join('\n- ')}`);
   }
   if (problems.length) {
     throw new Error(`notes/notebook.yml has problems:\n- ${problems.join('\n- ')}`);
