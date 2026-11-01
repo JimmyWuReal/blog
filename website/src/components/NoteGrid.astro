@@ -1,7 +1,7 @@
 ---
-// Note cards with a short preview, date, tags, and difficulty, for the contents and tag pages.
+// Note cards with their description, date, tags, and difficulty, for the contents and tag pages.
 // Sub-sections get their own heading and grid.
-import { formatDate, isSection, notePreview, noteUrl, type Item, type Note } from '../lib/notebook';
+import { formatDate, isSection, noteUrl, type Item, type Note } from '../lib/notebook';
 import NoteMeta from './NoteMeta.astro';
 
 interface Props {
@@ -17,25 +17,22 @@ const sections = items.filter(isSection);
   {
     notes.length > 0 && (
       <ul class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
-        {notes.map((note) => {
-          const preview = notePreview(note);
-          return (
-            <li class="relative flex flex-col gap-2 rounded-2xl bg-[#111] p-5 hover:bg-[#161616]">
-              <a href={noteUrl(note)} class="text-[15px] font-medium tracking-[-0.01em] text-[#efefef] no-underline after:absolute after:inset-0 after:rounded-2xl">
-                {note.data.title}
-              </a>
-              {preview && <p class="m-0 line-clamp-2 text-[12.5px] leading-[1.7] text-[#7d7d7d]">{preview}</p>}
-              {note.data.date && (
-                <time class="font-[DM_Mono,ui-monospace,monospace] text-[11px] leading-none text-[#6f6f6f] tabular-nums" datetime={formatDate(note.data.date)}>
-                  {formatDate(note.data.date)}
-                </time>
-              )}
-              <div class="relative mt-auto pt-2 empty:hidden">
-                <NoteMeta note={note} />
-              </div>
-            </li>
-          );
-        })}
+        {notes.map((note) => (
+          <li class="relative flex flex-col gap-2 rounded-2xl bg-[#111] p-5 hover:bg-[#161616]">
+            <a href={noteUrl(note)} class="text-[15px] font-medium tracking-[-0.01em] text-[#efefef] no-underline after:absolute after:inset-0 after:rounded-2xl">
+              {note.data.title}
+            </a>
+            {note.data.description && <p class="m-0 line-clamp-2 text-[12.5px] leading-[1.7] text-[#7d7d7d]">{note.data.description}</p>}
+            {note.data.date && (
+              <time class="font-[DM_Mono,ui-monospace,monospace] text-[11px] leading-none text-[#6f6f6f] tabular-nums" datetime={formatDate(note.data.date)}>
+                {formatDate(note.data.date)}
+              </time>
+            )}
+            <div class="relative mt-auto pt-2 empty:hidden">
+              <NoteMeta note={note} />
+            </div>
+          </li>
+        ))}
       </ul>
     )
   }

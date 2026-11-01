@@ -63,33 +63,5 @@ export async function getTags() {
   return tags;
 }
 
-/** The note's `description`, or else its opening text as plain text, for link previews. Empty if it opens with code or a heading. */
-export function noteDescription(note: Note, max = 150) {
-  if (note.data.description) return note.data.description;
-  const paragraph = (note.body ?? '').trim().split(/\n\s*\n/)[0] ?? '';
-  return isProse(paragraph) ? plainText(paragraph, max) : '';
-}
-
-/** The note's `description`, or else its first prose paragraph as plain text, skipping headings and code, for note cards. */
-export function notePreview(note: Note, max = 110) {
-  if (note.data.description) return note.data.description;
-  const body = (note.body ?? '').replace(/^```[\s\S]*?^```/gm, '').replace(/^\$\$[\s\S]*?\$\$/gm, '');
-  const paragraph = body.trim().split(/\n\s*\n/).find(isProse) ?? '';
-  return plainText(paragraph, max);
-}
-
 /** A frontmatter date as YYYY-MM-DD. YAML dates are midnight UTC, so format in UTC. */
 export const formatDate = (date: Date) => date.toISOString().slice(0, 10);
-
-const isProse = (paragraph: string) => paragraph !== '' && !/^(#|```|\$\$|\||>|<|-{3,}\s*$)/.test(paragraph);
-
-function plainText(paragraph: string, max: number) {
-  const text = paragraph
-    .replace(/!\[[^\]]*\]\([^)]*\)/g, '')
-    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
-    .replace(/\*\*|__|~~|[`$]/g, '')
-    .replace(/^\s*(?:[-+]|\d+\.)\s+/gm, '')
-    .replace(/\s+/g, ' ')
-    .trim();
-  return [...text].length > max ? `${[...text].slice(0, max - 1).join('').trimEnd()}…` : text;
-}

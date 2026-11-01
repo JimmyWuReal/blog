@@ -29,14 +29,14 @@ Text starts here. The page's title comes from `title`, so don't repeat it as a `
 | Field        | Required | Notes                                                        |
 | ------------ | -------- | ------------------------------------------------------------ |
 | `title`      | yes      | Shown on the site. The file name is only the URL.            |
-| `description` | no      | Shown on the note's card and in link previews. Defaults to the note's first paragraph. |
+| `description` | no      | Shown on the note's card and in link previews. Left empty if missing. |
 | `date`       | no       | `YYYY-MM-DD`. Shown on the note's card under its description. |
 | `tags`       | no       | A list, or a single word. Each tag gets a page at `/tags/<tag>`. |
 | `difficulty` | no       | Whole number from 1 (easiest) to 10.                         |
 
 The note's URL is its path: `notes/graph/dijkstra.md` → `cp.jimmywu.app/graph/dijkstra`.
 
-Each note also gets a link-preview (Open Graph) image at `/og/graph/dijkstra.png`, made at build time from its title, section, tags, and difficulty. The preview text is the note's `description`, or its first paragraph if it has none.
+Each note also gets a link-preview (Open Graph) image at `/og/graph/dijkstra.png`, made at build time from its title, section, tags, and difficulty. The preview text is the note's `description`.
 
 ### Markdown
 

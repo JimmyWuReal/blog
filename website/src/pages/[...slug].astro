@@ -4,7 +4,7 @@ import { render } from 'astro:content';
 import Base from '../layouts/Base.astro';
 import NoteMeta from '../components/NoteMeta.astro';
 import Sidebar from '../components/Sidebar.astro';
-import { getNotebook, noteDescription, noteUrl } from '../lib/notebook';
+import { getNotebook, noteUrl } from '../lib/notebook';
 import '../styles/note.css';
 
 export async function getStaticPaths() {
@@ -21,7 +21,7 @@ const { Content, headings } = await render(note);
 const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
 ---
 
-<Base title={note.data.title} description={noteDescription(note)} image={`/og/${note.id}.png`} type="article">
+<Base title={note.data.title} description={note.data.description} image={`/og/${note.id}.png`} type="article">
   <div class="mx-auto flex max-w-[1480px]">
     <aside class="sticky top-0 hidden h-screen w-[264px] shrink-0 overflow-y-auto px-5 py-8 lg:block">
       <a href="/" class="mb-8 block px-[10px] text-[15px] font-semibold tracking-[-0.035em] text-[#efefef] no-underline">
