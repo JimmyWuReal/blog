@@ -1,18 +1,23 @@
 ---
-// Single-column page for the contents, tag, and 404 pages.
+// Wide page for the contents, tag, and 404 pages.
 import Base from './Base.astro';
 import { getNotebook } from '../lib/notebook';
 
 interface Props {
   title?: string;
+  /** Open Graph image path; defaults to the contents page's. */
+  image?: string;
 }
 
 const notebook = await getNotebook();
 ---
 
-<Base title={Astro.props.title}>
-  <div class="mx-auto max-w-[760px] px-4 pt-8 pb-24 sm:px-10">
-    <a href="/" class="text-[15px] font-semibold tracking-[-0.035em] text-[#efefef] no-underline">{notebook.title}</a>
+<Base title={Astro.props.title} image={Astro.props.image}>
+  <div class="mx-auto max-w-[1120px] px-4 pt-8 pb-24 sm:px-10">
+    <header class="flex items-center justify-between gap-6">
+      <a href="/" class="text-[15px] font-semibold tracking-[-0.035em] text-[#efefef] no-underline">{notebook.title}</a>
+      <a href="https://jimmywu.app" class="text-[13px] font-medium tracking-[-0.01em] text-[#8a8a8a] no-underline hover:text-white">by Jimmy Wu</a>
+    </header>
     <main class="mt-16 sm:mt-20">
       <slot />
     </main>
