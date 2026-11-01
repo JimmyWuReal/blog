@@ -38,6 +38,10 @@ sections:
           - math/matrix-multiplication
           - math/matrix-fast-power
 
+  - section: Solutions
+    notes:
+      - solutions/apcs-2026-nov
+
   - section: Other
     notes:
       - other/credits
