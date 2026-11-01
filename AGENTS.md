@@ -12,3 +12,5 @@ When commiting the commit message should be:
 1. `notes: ???` for note change
 2. `website: ???` for website change 
 3. `other: ???` for other change 
+
+Also only write commit message in lowercase and short words 
