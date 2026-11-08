@@ -1,17 +1,5 @@
-# The notebook's structure: sections, their order, and the notes in each.
-#
-# - `title` is the notebook name shown in the sidebar, on its card, and in the browser tab.
-# - `description` is shown on the notebook's card on the home page. Optional.
-# - Each section has a `section` name and a list of `notes`.
-# - A note is its path inside this folder, without `.md` (math/fast-power → math/fast-power.md).
-#   Its URL is the notebook's folder name plus that path: blog.jimmywu.app/cp/math/fast-power
-# - A section can contain sub-sections, written the same way.
-#
-# Notes left out of this file are drafts and get no page. The build fails and says why
-# if a note is listed twice or listed but has no file.
-
 title: Competitive Programming
-description: 競技程式的筆記與題解。
+description: 競技程式筆記
 
 sections:
   - section: Introduction
