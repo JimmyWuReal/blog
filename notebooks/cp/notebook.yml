@@ -18,6 +18,10 @@ sections:
     notes:
       - math/fast-power
 
+  - section: Graph
+    notes:
+      - graph/dijkstra
+
   - section: Other
     notes:
       - other/credits
