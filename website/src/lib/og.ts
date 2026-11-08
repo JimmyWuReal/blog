@@ -10,13 +10,14 @@ export const OG_WIDTH = 1200;
 export const OG_HEIGHT = 630;
 
 export type OgCard = {
-  notebook: string;
+  /** Small line next to the mark: the site or the note's notebook. */
+  label: string;
   title: string;
   /** Section names above the title, e.g. ['Math', '矩陣']. */
   path?: string[];
   tags?: string[];
   difficulty?: number;
-  /** Small line under the title, e.g. "3 notes". */
+  /** Small line under the title, e.g. "3 notes" or a post's date. */
   caption?: string;
 };
 
@@ -77,7 +78,7 @@ const mark = (size: number): Node => ({
   },
 });
 
-function card({ notebook, title, path = [], tags = [], difficulty, caption }: OgCard): Node {
+function card({ label, title, path = [], tags = [], difficulty, caption }: OgCard): Node {
   // CJK characters are about 1em wide, so long titles step down to stay within two lines.
   const width = [...title].reduce((sum, c) => sum + (c.charCodeAt(0) > 0x2e7f ? 1 : 0.55), 0);
   const size = width <= 12 ? 96 : width <= 20 ? 80 : 64;
@@ -100,7 +101,7 @@ function card({ notebook, title, path = [], tags = [], difficulty, caption }: Og
       'div',
       { display: 'flex', alignItems: 'center', gap: 18 },
       mark(44),
-      h('div', { fontSize: 30, fontWeight: 600, letterSpacing: -1, color: '#efefef' }, notebook),
+      h('div', { fontSize: 30, fontWeight: 600, letterSpacing: -1, color: '#efefef' }, label),
     ),
     h(
       'div',
@@ -132,7 +133,7 @@ function card({ notebook, title, path = [], tags = [], difficulty, caption }: Og
 }
 
 export async function renderOgImage(data: OgCard): Promise<Uint8Array> {
-  const text = [data.notebook, data.title, ...(data.path ?? []), ...(data.tags ?? []), data.caption ?? ''].join('');
+  const text = [data.label, data.title, ...(data.path ?? []), ...(data.tags ?? []), data.caption ?? ''].join('');
   const svg = await satori(card(data) as never, { width: OG_WIDTH, height: OG_HEIGHT, fonts: await loadFonts(text) });
   return new Resvg(svg, { fitTo: { mode: 'width', value: OG_WIDTH } }).render().asPng();
 }

@@ -1,15 +1,16 @@
 ---
-// Note cards with their description, date, tags, and difficulty, for the contents and tag pages.
-// Sub-sections get their own heading and grid.
-import { formatDate, isSection, noteUrl, type Item, type Note } from '../lib/notebook';
+// Cards for posts and notes with their description, date, tags, and difficulty, for the
+// home, notebook contents, and tag pages. Sub-sections get their own heading and grid.
+import { isSection, type Item } from '../lib/notebook';
+import { entryUrl, formatDate, type Entry } from '../lib/site';
 import NoteMeta from './NoteMeta.astro';
 
 interface Props {
-  items: Item[];
+  items: (Item | Entry)[];
 }
 
 const { items } = Astro.props;
-const notes = items.filter((item): item is Note => !isSection(item));
+const notes = items.filter((item): item is Entry => !isSection(item));
 const sections = items.filter(isSection);
 ---
 
@@ -19,7 +20,7 @@ const sections = items.filter(isSection);
       <ul class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
         {notes.map((note) => (
           <li class="relative flex flex-col gap-2 rounded-2xl bg-[#111] p-5 hover:bg-[#161616]">
-            <a href={noteUrl(note)} class="text-[15px] font-medium tracking-[-0.01em] text-[#efefef] no-underline after:absolute after:inset-0 after:rounded-2xl">
+            <a href={entryUrl(note)} class="text-[15px] font-medium tracking-[-0.01em] text-[#efefef] no-underline after:absolute after:inset-0 after:rounded-2xl">
               {note.data.title}
             </a>
             {note.data.description && <p class="m-0 line-clamp-2 text-[12.5px] leading-[1.7] text-[#7d7d7d]">{note.data.description}</p>}
@@ -29,7 +30,7 @@ const sections = items.filter(isSection);
               </time>
             )}
             <div class="relative mt-auto pt-2 empty:hidden">
-              <NoteMeta note={note} />
+              <NoteMeta entry={note} />
             </div>
           </li>
         ))}

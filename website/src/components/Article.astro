@@ -1,0 +1,131 @@
+---
+// The reading view of a post or note: title, meta, rendered markdown, previous / next
+// links, and "On this page". Code blocks get a copy button.
+import { render } from 'astro:content';
+import NoteMeta from './NoteMeta.astro';
+import { entryUrl, formatDate, type Entry } from '../lib/site';
+import '../styles/note.css';
+
+interface Props {
+  entry: Entry;
+  prev?: Entry;
+  next?: Entry;
+}
+
+const { entry, prev, next } = Astro.props;
+const { Content, headings } = await render(entry);
+const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+---
+
+<div class="flex justify-center gap-14 px-4 py-10 sm:px-10 lg:py-16">
+  <main class="w-full max-w-[740px] min-w-0">
+    <h1 class="m-0 text-[32px] leading-[1.2] font-medium tracking-[-0.035em] sm:text-[36px]">{entry.data.title}</h1>
+    {
+      entry.data.date && (
+        <time class="mt-3 block font-[DM_Mono,ui-monospace,monospace] text-[12px] text-[#6f6f6f] tabular-nums" datetime={formatDate(entry.data.date)}>
+          {formatDate(entry.data.date)}
+        </time>
+      )
+    }
+    <div class="mt-4 empty:hidden"><NoteMeta entry={entry} /></div>
+
+    <article class="note mt-10">
+      <Content />
+    </article>
+
+    {
+      (prev || next) && (
+        <nav aria-label="Previous and next" class="mt-20 flex justify-between gap-6">
+          {prev ? (
+            <a href={entryUrl(prev)} class="group flex flex-col gap-1 no-underline">
+              <span class="text-[12px] text-[#6f6f6f]">Previous</span>
+              <span class="text-[14px] font-medium text-[#cfcfcf] group-hover:text-white">{prev.data.title}</span>
+            </a>
+          ) : <span />}
+          {next && (
+            <a href={entryUrl(next)} class="group flex flex-col items-end gap-1 text-right no-underline">
+              <span class="text-[12px] text-[#6f6f6f]">Next</span>
+              <span class="text-[14px] font-medium text-[#cfcfcf] group-hover:text-white">{next.data.title}</span>
+            </a>
+          )}
+        </nav>
+      )
+    }
+  </main>
+
+  {
+    toc.length > 0 && (
+      <aside class="sticky top-16 hidden max-h-[calc(100vh-8rem)] w-[200px] shrink-0 self-start overflow-y-auto xl:block">
+        <nav aria-label="On this page" data-toc>
+          <p class="mb-3 text-[12px] font-medium text-[#6f6f6f]">On this page</p>
+          <ul class="flex flex-col gap-2">
+            {toc.map((h) => (
+              <li class={h.depth === 3 ? 'pl-3' : ''}>
+                <a href={`#${h.slug}`} class="toc-link block text-[12.5px] leading-[1.45] text-[#7d7d7d] no-underline hover:text-white">
+                  {h.text}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      </aside>
+    )
+  }
+</div>
+
+<style>
+  .toc-link.is-active { color: #fff; }
+</style>
+
+<script>
+  // Copy button on every code block
+  const copyIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>';
+  const checkIcon = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
+  for (const pre of document.querySelectorAll<HTMLPreElement>('.note pre')) {
+    const block = document.createElement('div');
+    block.className = 'code-block';
+    pre.replaceWith(block);
+    block.append(pre);
+    const anchor = document.createElement('span');
+    anchor.className = 'code-copy tooltip-anchor';
+    anchor.innerHTML = `<span class="tooltip" aria-hidden="true">Copy</span><button class="icon-button is-small" type="button" aria-label="Copy code">${copyIcon}</button>`;
+    block.append(anchor);
+    const button = anchor.querySelector('button')!;
+    const tip = anchor.querySelector('.tooltip')!;
+    let timer: number | undefined;
+    button.addEventListener('click', async () => {
+      const code = [...pre.querySelectorAll('.line')].map((line) => line.textContent).join('\n') || pre.innerText;
+      try {
+        await navigator.clipboard.writeText(code);
+      } catch {
+        return;
+      }
+      tip.textContent = 'Copied';
+      button.innerHTML = checkIcon;
+      button.setAttribute('aria-label', 'Copied');
+      anchor.classList.add('is-shown');
+      clearTimeout(timer);
+      timer = window.setTimeout(() => {
+        tip.textContent = 'Copy';
+        button.innerHTML = copyIcon;
+        button.setAttribute('aria-label', 'Copy code');
+        anchor.classList.remove('is-shown');
+      }, 1600);
+    });
+  }
+
+  // Highlight the section being read in "On this page"
+  const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-toc] .toc-link')];
+  const targets = links.map((link) => document.getElementById(decodeURIComponent(link.hash.slice(1))));
+  let frame = 0;
+  const spy = () => {
+    frame = 0;
+    let current = 0;
+    targets.forEach((el, i) => el && el.getBoundingClientRect().top < 120 && (current = i));
+    links.forEach((link, i) => link.classList.toggle('is-active', i === current));
+  };
+  if (links.length) {
+    addEventListener('scroll', () => (frame ||= requestAnimationFrame(spy)), { passive: true });
+    spy();
+  }
+</script>

@@ -1,21 +1,22 @@
 ---
 import '../styles/global.css';
-import { getNotebook } from '../lib/notebook';
+import { SITE_TITLE } from '../lib/site';
 
 interface Props {
-  /** Page title; the notebook title is appended. Omit on the home page. */
+  /** Page title; `context` is appended. Omit on the home page. */
   title?: string;
+  /** What the page belongs to, after its title in the browser tab. Defaults to the site title. */
+  context?: string;
   /** Link-preview text. Omitted when empty. */
   description?: string;
   /** Path of the page's Open Graph image, from src/pages/og. */
   image?: string;
-  /** `article` for notes, `website` for everything else. */
+  /** `article` for posts and notes, `website` for everything else. */
   type?: 'website' | 'article';
 }
 
-const notebook = await getNotebook();
-const { title, description, image = '/og/index.png', type = 'website' } = Astro.props;
-const fullTitle = title ? `${title} · ${notebook.title}` : notebook.title;
+const { title, context = SITE_TITLE, description, image = '/og/index.png', type = 'website' } = Astro.props;
+const fullTitle = title ? `${title} · ${context}` : SITE_TITLE;
 // In the build, pathname is the output file (/math/fast-power.html, /index.html); the
 // public URL drops the extension, and the home page is /.
 const url = new URL(Astro.url.pathname.replace(/(?:\/index)?\.html$/, '') || '/', Astro.site);
@@ -32,11 +33,11 @@ const imageUrl = new URL(image, Astro.site);
     <title>{fullTitle}</title>
     {description && <meta name="description" content={description} />}
 
-    <meta property="og:site_name" content={notebook.title} />
+    <meta property="og:site_name" content={SITE_TITLE} />
     <meta property="og:locale" content="zh_TW" />
     <meta property="og:type" content={type} />
     <meta property="og:url" content={url} />
-    <meta property="og:title" content={title ?? notebook.title} />
+    <meta property="og:title" content={title ?? SITE_TITLE} />
     {description && <meta property="og:description" content={description} />}
     <meta property="og:image" content={imageUrl} />
     <meta property="og:image:type" content="image/png" />

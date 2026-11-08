@@ -7,8 +7,8 @@ import rehypeKatex from 'rehype-katex';
 import { lineNumbers, remarkHackmdCode, remarkNoteLinks } from './src/lib/markdown.mjs';
 
 export default defineConfig({
-  site: 'https://cp.jimmywu.app',
-  // Pages build to /math/fast-power.html, which Cloudflare serves at /math/fast-power.
+  site: 'https://blog.jimmywu.app',
+  // Pages build to /cp/math/fast-power.html, which Cloudflare serves at /cp/math/fast-power.
   build: { format: 'file' },
   trailingSlash: 'never',
   markdown: {

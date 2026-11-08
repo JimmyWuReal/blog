@@ -1,0 +1,59 @@
+---
+// A note's page in HackMD's book layout: the notebook tree beside the note. On small
+// screens the tree moves into a full-screen menu.
+import Base from './Base.astro';
+import Sidebar from '../components/Sidebar.astro';
+import { SITE_TITLE } from '../lib/site';
+import type { Note, Notebook } from '../lib/notebook';
+
+interface Props {
+  notebook: Notebook;
+  note: Note;
+}
+
+const { notebook, note } = Astro.props;
+const home = `/${notebook.slug}`;
+---
+
+<Base title={note.data.title} context={notebook.title} description={note.data.description} image={`/og/${note.id}.png`} type="article">
+  <div class="mx-auto flex max-w-[1480px]">
+    <aside class="sticky top-0 hidden h-screen w-[264px] shrink-0 overflow-y-auto px-5 py-8 lg:block">
+      <a href="/" class="mb-1 block px-[10px] text-[12px] font-medium text-[#6f6f6f] no-underline hover:text-white">{SITE_TITLE}</a>
+      <a href={home} class="mb-8 block px-[10px] text-[15px] font-semibold tracking-[-0.035em] text-[#efefef] no-underline">
+        {notebook.title}
+      </a>
+      <Sidebar notebook={notebook} currentId={note.id} />
+    </aside>
+
+    <div class="min-w-0 flex-1">
+      <header class="flex items-center justify-between px-4 pt-4 lg:hidden">
+        <a href={home} class="text-[15px] font-semibold tracking-[-0.035em] text-[#efefef] no-underline">{notebook.title}</a>
+        <button class="icon-button" type="button" aria-label="Open notebook menu" data-menu-open>
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
+        </button>
+      </header>
+      <slot />
+    </div>
+  </div>
+
+  <dialog class="menu-dialog" aria-label="Notebook" data-menu>
+    <div class="flex items-center justify-between px-4 pt-4">
+      <a href={home} class="text-[15px] font-semibold tracking-[-0.035em] text-[#efefef] no-underline">{notebook.title}</a>
+      <button class="icon-button" type="button" aria-label="Close notebook menu" data-menu-close>
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" /></svg>
+      </button>
+    </div>
+    <div class="px-[6px] py-8">
+      <a href="/" class="mb-6 block px-[10px] text-[13px] font-medium text-[#8a8a8a] no-underline hover:text-white">← {SITE_TITLE}</a>
+      <Sidebar notebook={notebook} currentId={note.id} />
+    </div>
+  </dialog>
+</Base>
+
+<script>
+  // Mobile notebook menu
+  const menu = document.querySelector<HTMLDialogElement>('[data-menu]')!;
+  document.querySelector('[data-menu-open]')?.addEventListener('click', () => menu.showModal());
+  document.querySelector('[data-menu-close]')?.addEventListener('click', () => menu.close());
+  matchMedia('(min-width: 1024px)').addEventListener('change', (e) => e.matches && menu.close());
+</script>

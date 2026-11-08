@@ -1,13 +1,13 @@
 ---
-import { getNotebook } from '../lib/notebook';
+import type { Notebook } from '../lib/notebook';
 import NavTree from './NavTree.astro';
 
 interface Props {
+  notebook: Notebook;
   currentId?: string;
 }
 
-const notebook = await getNotebook();
-const { currentId } = Astro.props;
+const { notebook, currentId } = Astro.props;
 ---
 
 <nav aria-label="Notebook" class="flex flex-col gap-6">

@@ -1,12 +1,12 @@
 ---
-// A note's tags and difficulty from its frontmatter. Renders nothing if it has neither.
-import type { Note } from '../lib/notebook';
+// A post's or note's tags and difficulty from its frontmatter. Renders nothing if it has neither.
+import type { Entry } from '../lib/site';
 
 interface Props {
-  note: Note;
+  entry: Entry;
 }
 
-const { tags, difficulty } = Astro.props.note.data;
+const { tags, difficulty } = Astro.props.entry.data;
 ---
 
 {

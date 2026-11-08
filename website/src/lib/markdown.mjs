@@ -1,10 +1,12 @@
-// Markdown plugins that make notes render the way HackMD renders them.
+// Markdown plugins that make posts and notes render the way HackMD renders them.
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { visit } from 'unist-util-visit';
 
-export const NOTES_DIR = fileURLToPath(new URL('../../../notes/', import.meta.url));
+// Posts and notes are served at their path inside these folders.
+const ROOTS = ['../../../blogs/', '../../../notebooks/'].map((dir) => fileURLToPath(new URL(dir, import.meta.url)));
+const REPO = fileURLToPath(new URL('../../../', import.meta.url));
 
 /**
  * HackMD code fences: ```cpp= shows line numbers, ```cpp=101 starts them at 101,
@@ -35,7 +37,7 @@ export const lineNumbers = {
 };
 
 /**
- * Links between notes are written as relative paths to the .md file
+ * Links between posts and notes are written as relative paths to the .md file
  * (e.g. `[快速冪](../math/fast-power.md)`), so they also work on GitHub and in
  * editors. This turns them into site URLs and fails the build on broken links.
  */
@@ -45,10 +47,11 @@ export function remarkNoteLinks() {
       const [, target, hash = ''] = /^([^:#?]+\.md)(#.*)?$/.exec(node.url) ?? [];
       if (!target) return;
       const absolute = path.resolve(path.dirname(file.path), decodeURI(target));
-      if (!fs.existsSync(absolute)) {
-        throw new Error(`Broken link "${node.url}" in ${path.relative(NOTES_DIR, file.path)}`);
+      const root = ROOTS.find((dir) => absolute.startsWith(dir));
+      if (!root || !fs.existsSync(absolute)) {
+        throw new Error(`Broken link "${node.url}" in ${path.relative(REPO, file.path)}`);
       }
-      node.url = '/' + path.relative(NOTES_DIR, absolute).replace(/\.md$/, '').split(path.sep).join('/') + hash;
+      node.url = '/' + path.relative(root, absolute).replace(/\.md$/, '').split(path.sep).join('/') + hash;
     });
   };
 }

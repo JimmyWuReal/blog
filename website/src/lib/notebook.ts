@@ -1,14 +1,16 @@
-// Reads notes/notebook.yml and pairs it with the note files, so pages can render
-// the sidebar, the contents page, and previous / next links.
+// Reads every notebooks/<slug>/notebook.yml and pairs it with that folder's notes, so
+// pages can render the sidebar, the contents page, and previous / next links.
 import { getCollection, type CollectionEntry } from 'astro:content';
 import { parse } from 'yaml';
-import notebookYml from '../../../notes/notebook.yml?raw';
 
 export type Note = CollectionEntry<'notes'>;
 export type Section = { title: string; items: Item[] };
 export type Item = Note | Section;
 export type Notebook = {
+  /** The folder name, which is also the notebook's URL: cp → /cp. */
+  slug: string;
   title: string;
+  description?: string;
   sections: Section[];
   order: Note[];
   /** Each note's section names, outermost first, keyed by note id. */
@@ -16,57 +18,52 @@ export type Notebook = {
 };
 
 type RawSection = { section: string; notes: (string | RawSection)[] };
+type RawNotebook = { title: string; description?: string; sections: RawSection[] };
 
-export const isSection = (item: Item): item is Section => 'items' in item;
-export const noteUrl = (note: Note) => `/${note.id}`;
+const ymls = import.meta.glob<string>('../../../notebooks/*/notebook.yml', { query: '?raw', import: 'default', eager: true });
+
+export const isSection = (item: object): item is Section => 'items' in item;
 
 // Cached for the build; reloaded on every request in dev so edits show up.
-let cached: Promise<Notebook> | undefined;
+let cached: Promise<Notebook[]> | undefined;
 let draftsLogged = false;
-export const getNotebook = () => (import.meta.env.DEV ? load() : (cached ??= load()));
+export const getNotebooks = () => (import.meta.env.DEV ? load() : (cached ??= load()));
 
-async function load(): Promise<Notebook> {
-  const raw = parse(notebookYml) as { title: string; sections: RawSection[] };
+async function load(): Promise<Notebook[]> {
   const notes = new Map((await getCollection('notes')).map((note) => [note.id, note]));
-  const order: Note[] = [];
-  const sectionPath = new Map<string, string[]>();
+  const listed = new Set<string>();
   const problems: string[] = [];
 
-  const toSection = ({ section, notes: entries }: RawSection, parents: string[] = []): Section => ({
-    title: section,
-    items: (entries ?? []).flatMap((entry): Item[] => {
-      if (typeof entry !== 'string') return [toSection(entry, [...parents, section])];
-      const id = entry.replace(/\.md$/, '');
-      const note = notes.get(id);
-      if (!note) problems.push(`"${entry}" is listed but notes/${id}.md does not exist.`);
-      else if (order.includes(note)) problems.push(`"${entry}" is listed more than once.`);
-      else return order.push(note), sectionPath.set(id, [...parents, section]), [note];
-      return [];
-    }),
+  const notebooks = Object.entries(ymls).map(([file, yml]): Notebook => {
+    const slug = file.split('/').at(-2)!;
+    const raw = parse(yml) as RawNotebook;
+    const order: Note[] = [];
+    const sectionPath = new Map<string, string[]>();
+
+    const toSection = ({ section, notes: entries }: RawSection, parents: string[] = []): Section => ({
+      title: section,
+      items: (entries ?? []).flatMap((entry): Item[] => {
+        if (typeof entry !== 'string') return [toSection(entry, [...parents, section])];
+        const id = `${slug}/${entry.replace(/\.md$/, '')}`;
+        const note = notes.get(id);
+        if (!note) problems.push(`notebooks/${slug}/notebook.yml: "${entry}" is listed but notebooks/${id}.md does not exist.`);
+        else if (listed.has(id)) problems.push(`notebooks/${slug}/notebook.yml: "${entry}" is listed more than once.`);
+        else return listed.add(id), order.push(note), sectionPath.set(id, [...parents, section]), [note];
+        return [];
+      }),
+    });
+
+    const sections = (raw.sections ?? []).map((section) => toSection(section));
+    return { slug, title: raw.title, description: raw.description, sections, order, sectionPath };
   });
 
-  const sections = (raw.sections ?? []).map((section) => toSection(section));
   // Notes left out of notebook.yml are drafts: they get no page. Say which, so a
   // forgotten note doesn't go unnoticed.
-  const drafts = [...notes.keys()].filter((id) => !order.some((note) => note.id === id));
+  const drafts = [...notes.keys()].filter((id) => !listed.has(id));
   if (drafts.length && !draftsLogged) {
     draftsLogged = true;
-    console.info(`Unlisted notes (drafts, not built):\n- ${drafts.map((id) => `notes/${id}.md`).join('\n- ')}`);
+    console.info(`Unlisted notes (drafts, not built):\n- ${drafts.map((id) => `notebooks/${id}.md`).join('\n- ')}`);
   }
-  if (problems.length) {
-    throw new Error(`notes/notebook.yml has problems:\n- ${problems.join('\n- ')}`);
-  }
-  return { title: raw.title, sections, order, sectionPath };
+  if (problems.length) throw new Error(`Notebook problems:\n- ${problems.join('\n- ')}`);
+  return notebooks.sort((a, b) => a.title.localeCompare(b.title));
 }
-
-/** Every tag with its notes, in notebook order. */
-export async function getTags() {
-  const tags = new Map<string, Note[]>();
-  for (const note of (await getNotebook()).order) {
-    for (const tag of note.data.tags) tags.set(tag, [...(tags.get(tag) ?? []), note]);
-  }
-  return tags;
-}
-
-/** A frontmatter date as YYYY-MM-DD. YAML dates are midnight UTC, so format in UTC. */
-export const formatDate = (date: Date) => date.toISOString().slice(0, 10);

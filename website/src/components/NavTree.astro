@@ -1,6 +1,7 @@
 ---
 // The notebook tree from notebook.yml. Renders itself for sub-sections.
-import { isSection, noteUrl, type Item } from '../lib/notebook';
+import { isSection, type Item } from '../lib/notebook';
+import { entryUrl } from '../lib/site';
 
 interface Props {
   items: Item[];
@@ -20,7 +21,7 @@ const { items, currentId } = Astro.props;
         </li>
       ) : (
         <li>
-          <a class="nav-link" href={noteUrl(item)} aria-current={item.id === currentId ? 'page' : undefined}>
+          <a class="nav-link" href={entryUrl(item)} aria-current={item.id === currentId ? 'page' : undefined}>
             {item.data.title}
           </a>
         </li>

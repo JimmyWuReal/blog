@@ -1,20 +1,33 @@
-// Open Graph images: /og/index.png for the contents page, /og/<note id>.png for each
-// note, and /og/tags/<tag>.png for each tag page. Rendered once at build time.
+// Open Graph images, rendered once at build time: /og/index.png for the home page,
+// /og/<notebook>.png for each notebook's contents, /og/<post or note id>.png for each
+// post and note, and /og/tags/<tag>.png for each tag page.
 import type { APIRoute, GetStaticPaths } from 'astro';
-import { getNotebook, getTags } from '../../lib/notebook';
+import { getNotebooks } from '../../lib/notebook';
+import { SITE_TITLE, countEntries, formatDate, getPosts, getTags, plural } from '../../lib/site';
 import { renderOgImage, type OgCard } from '../../lib/og';
 
 export const getStaticPaths = (async () => {
-  const { title: notebook, order, sectionPath } = await getNotebook();
+  const notebooks = await getNotebooks();
+  const posts = await getPosts();
   const cards: { path: string; card: OgCard }[] = [
-    { path: 'index', card: { notebook, title: 'Contents', caption: `${order.length} notes` } },
-    ...order.map((note) => ({
-      path: note.id,
-      card: { notebook, title: note.data.title, path: sectionPath.get(note.id), tags: note.data.tags, difficulty: note.data.difficulty },
+    {
+      path: 'index',
+      card: { label: 'Jimmy Wu', title: 'Blog', caption: [posts.length && plural(posts.length, 'post'), plural(notebooks.length, 'notebook')].filter(Boolean).join(' · ') },
+    },
+    ...notebooks.flatMap(({ slug, title: notebook, order, sectionPath }) => [
+      { path: slug, card: { label: SITE_TITLE, title: notebook, caption: plural(order.length, 'note') } },
+      ...order.map((note) => ({
+        path: note.id,
+        card: { label: notebook, title: note.data.title, path: sectionPath.get(note.id), tags: note.data.tags, difficulty: note.data.difficulty },
+      })),
+    ]),
+    ...posts.map((post) => ({
+      path: post.id,
+      card: { label: SITE_TITLE, title: post.data.title, caption: formatDate(post.data.date), tags: post.data.tags, difficulty: post.data.difficulty },
     })),
-    ...[...(await getTags())].map(([tag, notes]) => ({
+    ...[...(await getTags())].map(([tag, entries]) => ({
       path: `tags/${tag}`,
-      card: { notebook, title: tag, caption: `${notes.length} ${notes.length === 1 ? 'note' : 'notes'}` },
+      card: { label: SITE_TITLE, title: tag, caption: countEntries(entries) },
     })),
   ];
   return cards.map(({ path, card }) => ({ params: { path }, props: { card } }));
