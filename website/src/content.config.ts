@@ -18,6 +18,13 @@ const page = z.object({
     .transform((tags) => (Array.isArray(tags) ? tags : [tags])),
   // 0 (easiest) to 10.
   difficulty: z.number().int().min(0).max(10).optional(),
+  // Prerequisite knowledge: `pre: 遞迴` or `pre: [遞迴, 模運算]`.
+  // Shown before the article; omitted or empty means no prerequisites section.
+  pre: z
+    .union([z.string(), z.array(z.string())])
+    .default([])
+    .transform((pre) => (Array.isArray(pre) ? pre : [pre]))
+    .transform((pre) => pre.map((item) => item.trim()).filter(Boolean)),
 });
 
 // An entry's id is its path without `.md`, which is also its URL.

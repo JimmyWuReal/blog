@@ -29,6 +29,17 @@ const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
     }
     <div class="mt-4 empty:hidden"><NoteMeta entry={entry} /></div>
 
+    {
+      entry.data.pre.length > 0 && (
+        <section aria-label="先備知識" class="mt-8 text-[14px] leading-[1.75] text-[#b8b8b8] [overflow-wrap:anywhere]">
+          <h2 class="mb-2 font-medium text-white">先備知識</h2>
+          <ul class="list-disc space-y-1 pl-6">
+            {entry.data.pre.map((item) => <li>{item}</li>)}
+          </ul>
+        </section>
+      )
+    }
+
     <article class="note mt-10">
       <Content />
     </article>
