@@ -37,7 +37,7 @@ title: 競技程式
 
 ### 資料的範圍與限制
 
-這個很重要，因為要算複雜度 (見 [complexity](../basics/complexity.md)) 來確定不會超時或是超過記憶體限制。
+這個很重要，因為要算複雜度 (見 complexity) 來確定不會超時或是超過記憶體限制。
 
 有些題目會在輸入的時候給你
 
@@ -89,7 +89,7 @@ Online Judge (簡稱OJ) 是會有題目，讓你傳送程式，並會幫你用�
 
 - **AC (Accepted)**: 所有測資通過，該題成功解出
 - **WA (Wrong Answer)**: 有測資的輸出不正確，有可能是格式或是答案有誤
-- **TLE (Time Limit Exceeded)**: 程式花太多時間執行，解法看 [complexity](../basics/complexity.md)，也要記得優化 IO ([starting template](../basics/starting-template.md))
+- **TLE (Time Limit Exceeded)**: 程式花太多時間執行，解法看 complexity，也要記得優化 IO ([starting template](../basics/starting-template.md))
 - **MLE (Memory Limit Exceeded)**: 用太多記憶體，常見原因是因為遞迴一直增加新的元素沒有刪掉
 - **RE (Runtime Error)**: 在運行的過程中出問題，像是陣列越界、除以0等
 - **CE (Compilation Error)**: 編譯失敗，這個只要你有測試基本上不會發生

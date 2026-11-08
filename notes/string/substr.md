@@ -1,4 +1,0 @@
----
-title: substr
-tags: [string]
----
