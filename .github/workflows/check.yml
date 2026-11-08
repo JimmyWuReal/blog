@@ -1,5 +1,5 @@
 # Builds the site on every push and pull request. The build fails on bad
-# frontmatter, broken note links, or a notes/notebook.yml that doesn't match the notes.
+# frontmatter, broken links, or a notebook.yml that doesn't match its notes.
 # Deployment is done by Cloudflare Pages, not here.
 name: Check
 
