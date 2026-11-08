@@ -23,7 +23,7 @@ export const getStaticPaths = (async () => {
     ]),
     ...posts.map((post) => ({
       path: post.id,
-      card: { label: SITE_TITLE, title: post.data.title, caption: formatDate(post.data.date), tags: post.data.tags, difficulty: post.data.difficulty },
+      card: { label: SITE_TITLE, title: post.data.title, caption: post.data.date ? formatDate(post.data.date) : undefined, tags: post.data.tags, difficulty: post.data.difficulty },
     })),
     ...[...(await getTags())].map(([tag, entries]) => ({
       path: `tags/${tag}`,

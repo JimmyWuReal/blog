@@ -9,6 +9,8 @@ const page = z.object({
   description: z.string().optional(),
   // `date: 2026-11-01`. Shown on cards and on the page.
   date: z.coerce.date().optional(),
+  // `draft: true` keeps a post or notebook note off the site.
+  draft: z.boolean().default(false),
   // `tags: [math, dp]`, or a single `tags: math`.
   tags: z
     .union([z.string(), z.array(z.string())])
@@ -24,12 +26,7 @@ const generateId = ({ entry }: { entry: string }) => entry.replace(/\.md$/, '');
 // Every .md file in blogs/: blogs/hello.md → /hello.
 const posts = defineCollection({
   loader: glob({ pattern: '**/*.md', base: '../blogs', generateId }),
-  schema: page.extend({
-    // Posts are listed newest first, so they need a date.
-    date: z.coerce.date(),
-    // `draft: true` keeps a post off the site.
-    draft: z.boolean().default(false),
-  }),
+  schema: page,
 });
 
 // Every .md file in notebooks/: notebooks/cp/math/fast-power.md → /cp/math/fast-power.

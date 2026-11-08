@@ -26,7 +26,6 @@ export const isSection = (item: object): item is Section => 'items' in item;
 
 // Cached for the build; reloaded on every request in dev so edits show up.
 let cached: Promise<Notebook[]> | undefined;
-let draftsLogged = false;
 export const getNotebooks = () => (import.meta.env.DEV ? load() : (cached ??= load()));
 
 async function load(): Promise<Notebook[]> {
@@ -48,7 +47,13 @@ async function load(): Promise<Notebook[]> {
         const note = notes.get(id);
         if (!note) problems.push(`notebooks/${slug}/notebook.yml: "${entry}" is listed but notebooks/${id}.md does not exist.`);
         else if (listed.has(id)) problems.push(`notebooks/${slug}/notebook.yml: "${entry}" is listed more than once.`);
-        else return listed.add(id), order.push(note), sectionPath.set(id, [...parents, section]), [note];
+        else {
+          listed.add(id);
+          if (note.data.draft) return [];
+          order.push(note);
+          sectionPath.set(id, [...parents, section]);
+          return [note];
+        }
         return [];
       }),
     });
@@ -57,12 +62,12 @@ async function load(): Promise<Notebook[]> {
     return { slug, title: raw.title, description: raw.description, sections, order, sectionPath };
   });
 
-  // Notes left out of notebook.yml are drafts: they get no page. Say which, so a
-  // forgotten note doesn't go unnoticed.
-  const drafts = [...notes.keys()].filter((id) => !listed.has(id));
-  if (drafts.length && !draftsLogged) {
-    draftsLogged = true;
-    console.info(`Unlisted notes (drafts, not built):\n- ${drafts.map((id) => `notebooks/${id}.md`).join('\n- ')}`);
+  // Every published note needs a place in its notebook's sidebar.
+  for (const [id, note] of notes) {
+    if (!note.data.draft && !listed.has(id)) {
+      const slug = id.split('/')[0];
+      problems.push(`notebooks/${id}.md is not listed in notebooks/${slug}/notebook.yml; add it or set draft: true.`);
+    }
   }
   if (problems.length) throw new Error(`Notebook problems:\n- ${problems.join('\n- ')}`);
   return notebooks.sort((a, b) => a.title.localeCompare(b.title));

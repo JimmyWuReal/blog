@@ -15,7 +15,7 @@ export const entryUrl = (entry: Entry) => `/${entry.id}`;
 // URLs that a post can't take, besides notebook slugs.
 const RESERVED = ['index', '404', 'tags', 'og'];
 
-/** Published posts, newest first. Fails the build if a post's URL collides with another page. */
+/** Published posts, newest first with undated posts last. Fails on URL collisions. */
 export async function getPosts() {
   const notebooks = new Set((await getNotebooks()).map((notebook) => notebook.slug));
   const posts = (await getCollection('posts')).filter((post) => !post.data.draft);
@@ -26,7 +26,11 @@ export async function getPosts() {
   if (clashes.length) {
     throw new Error(`These posts' URLs collide with a notebook or a site page; rename them:\n- ${clashes.map((post) => `blogs/${post.id}.md`).join('\n- ')}`);
   }
-  return posts.sort((a, b) => b.data.date.getTime() - a.data.date.getTime());
+  return posts.sort((a, b) => {
+    if (!a.data.date) return b.data.date ? 1 : a.id.localeCompare(b.id);
+    if (!b.data.date) return -1;
+    return b.data.date.getTime() - a.data.date.getTime() || a.id.localeCompare(b.id);
+  });
 }
 
 /** Every tag with its posts (newest first), then its notes (in notebook order). */
