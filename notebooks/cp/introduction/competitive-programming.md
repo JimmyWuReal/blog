@@ -1,5 +1,7 @@
 ---
 title: 競技程式
+description: 對於競程所做的基本介紹
+date: 2026-11-08
 ---
 
 這是對於競技程式 (Competitive Programming) 所做的介紹。

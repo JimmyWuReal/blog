@@ -1,5 +1,7 @@
 ---
 title: Hello World!
+description: 關於這份筆記
+date: 2026-11-08
 ---
 
 這是一份對於競技程式 (Competitive Programming) 的筆記，由吳京澤 Jimmy Wu. 所撰，有誤請寄至 real.jingzewu@gmail.com 或想辦法找到我。

@@ -1,6 +1,9 @@
 ---
 title: 快速冪
-tags: [math, divide-and-conquer]
+description: 快速計算指數的方法
+date: 2026-11-08
+tags: [math]
+difficulty: 3
 ---
 
 常見的快速冪主要是用來高效率算出一個東西的 $N$ 次方，但快速冪不只這樣，只要是有結合律的東西其實都有機會用到

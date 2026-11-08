@@ -1,5 +1,7 @@
 ---
 title: Credits
+description: 作者
+date: 2026-11-08
 ---
 
 這份筆記由 吳京澤 Jimmy Wu 所撰，有興趣幫忙寫可以找我

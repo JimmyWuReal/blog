@@ -1,5 +1,7 @@
 ---
 title: Copyright
+description: 版權注意事項
+date: 2026-11-08
 ---
 
 這份筆記由 吳京澤 撰

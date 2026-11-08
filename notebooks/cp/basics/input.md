@@ -1,5 +1,8 @@
 ---
 title: 輸入
+description: 輸入的不同方法、getline、stringstream
+date: 2026-11-08
+difficulty: 0
 ---
 
 ## 優化輸入
