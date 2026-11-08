@@ -10,15 +10,15 @@ const { tags, difficulty } = Astro.props.entry.data;
 ---
 
 {
-  (tags.length > 0 || difficulty) && (
+  (tags.length > 0 || difficulty !== undefined) && (
     <div class="flex flex-wrap items-center gap-2">
       {tags.map((tag) => (
         <a class="tag" href={`/tags/${encodeURIComponent(tag)}`}>
           {tag}
         </a>
       ))}
-      {difficulty && (
-        <span class="mono-value ml-1" title="Difficulty, 1 (easiest) to 10">
+      {difficulty !== undefined && (
+        <span class="mono-value ml-1" title="Difficulty, 0 (easiest) to 10">
           <span class="text-[#6f6f6f]">Difficulty </span>
           {difficulty}/10
         </span>

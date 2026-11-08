@@ -14,8 +14,8 @@ const page = z.object({
     .union([z.string(), z.array(z.string())])
     .default([])
     .transform((tags) => (Array.isArray(tags) ? tags : [tags])),
-  // 1 (easiest) to 10.
-  difficulty: z.number().int().min(1).max(10).optional(),
+  // 0 (easiest) to 10.
+  difficulty: z.number().int().min(0).max(10).optional(),
 });
 
 // An entry's id is its path without `.md`, which is also its URL.
