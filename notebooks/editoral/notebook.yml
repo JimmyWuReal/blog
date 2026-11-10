@@ -5,3 +5,6 @@ sections:
   - section: APCS
     notes:
       - apcs/apcs-2026-nov
+  - section: 學科能力競賽
+    notes:
+      - nhspc/regional-2026
