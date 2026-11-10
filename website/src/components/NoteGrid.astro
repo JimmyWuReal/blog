@@ -1,8 +1,8 @@
 ---
-// Cards for posts and notes with their description, date, tags, and difficulty, for the
+// Cards for posts and notes with their description, date, authors, tags, and difficulty, for the
 // home, notebook contents, and tag pages. Sub-sections get their own heading and grid.
 import { isSection, type Item } from '../lib/notebook';
-import { entryUrl, formatDate, type Entry } from '../lib/site';
+import { entryUrl, formatAuthors, formatDate, type Entry } from '../lib/site';
 import NoteMeta from './NoteMeta.astro';
 
 interface Props {
@@ -24,11 +24,12 @@ const sections = items.filter(isSection);
               {note.data.title}
             </a>
             {note.data.description && <p class="m-0 line-clamp-2 text-[12.5px] leading-[1.7] text-[#7d7d7d]">{note.data.description}</p>}
-            {note.data.date && (
-              <time class="font-[DM_Mono,ui-monospace,monospace] text-[11px] leading-none text-[#6f6f6f] tabular-nums" datetime={formatDate(note.data.date)}>
-                {formatDate(note.data.date)}
-              </time>
-            )}
+            <p class="m-0 font-[DM_Mono,ui-monospace,monospace] text-[11px] leading-relaxed text-[#8a8a8a] tabular-nums [overflow-wrap:anywhere]">
+              {note.data.date && (
+                <><time datetime={formatDate(note.data.date)}>{formatDate(note.data.date)}</time>{' · '}</>
+              )}
+              written by {formatAuthors(note.data.author)}
+            </p>
             <div class="relative mt-auto pt-2 empty:hidden">
               <NoteMeta entry={note} />
             </div>

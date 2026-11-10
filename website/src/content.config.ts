@@ -9,6 +9,8 @@ const page = z.object({
   description: z.string().optional(),
   // `date: 2026-11-01`. Shown on cards and on the page.
   date: z.coerce.date().optional(),
+  // Additional authors: `author: [x, y]`. Jimmy Wu is always credited first.
+  author: z.array(z.string().trim().min(1)).default([]),
   // `draft: true` keeps a post or notebook note off the site.
   draft: z.boolean().default(false),
   // `tags: [math, dp]`, or a single `tags: math`.

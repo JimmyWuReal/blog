@@ -46,6 +46,12 @@ export async function getTags() {
 /** A frontmatter date as YYYY-MM-DD. YAML dates are midnight UTC, so format in UTC. */
 export const formatDate = (date: Date) => date.toISOString().slice(0, 10);
 
+/** Jimmy Wu, followed by any additional authors from the frontmatter. */
+export function formatAuthors(author: string[]) {
+  const names = ['Jimmy Wu', ...author];
+  return names.length === 1 ? names[0] : `${names.slice(0, -1).join(', ')} and ${names.at(-1)}`;
+}
+
 export const plural = (count: number, word: string) => `${count} ${count === 1 ? word : `${word}s`}`;
 
 /** "2 posts · 3 notes", leaving out a kind there are none of. */
