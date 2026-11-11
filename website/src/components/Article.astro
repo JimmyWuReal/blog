@@ -14,7 +14,7 @@ interface Props {
 
 const { entry, prev, next } = Astro.props;
 const { Content, headings } = await render(entry);
-const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const toc = headings.filter((h) => h.depth >= 1 && h.depth <= 3);
 ---
 
 <div class="flex justify-center gap-14 px-4 py-10 sm:px-10 lg:py-16">
