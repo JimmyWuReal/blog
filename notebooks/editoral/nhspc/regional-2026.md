@@ -57,6 +57,82 @@ output:
 39
 ```
 
+## 程式
+
+寫一個確認字串是否為整數的程式 `strtoint` ，同時轉換為 `int` 
+
+這題不難，十分簡單，實戰中不能有問題，我寫的時候一開始一直想說判斷字串是不是整數是什麼，想不起來只好自己寫，比完才知道沒有這東西，用 `try-catch` 應該可以，只要注意有沒有整個字串都拿，沒有試過
+
+我比賽中是寫一個判斷的，然後用 `stoi` 換成 `int`，我只拿了 $14/15$ ，不知道是不是 `stoi` 會有問題，另一個人說不是用 `stoi` 有滿分，有一個跟我一樣用 `stoi` 也是 $14$ 分，無法得知原因。
+
+```cpp=
+#include <bits/stdc++.h>
+using namespace std;
+
+int strtoint(string s) {
+    int n=s.size(); 
+    bool neg=false; 
+    int x=0; 
+    for (int i=0; i<n; i++) {
+        if (i==0 && s[i]=='-' && n>1) {
+            neg=true; 
+            continue;
+        }
+
+        if (!isdigit(s[i])) {
+            return 0; 
+        } else {
+            x=x*10+(s[i]-'0'); 
+        }
+    }
+
+    return neg ? -x : x; 
+}
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    string s;
+
+    bool ended=false; 
+
+    int money=0; 
+    int d=0; 
+
+    while (cin>>s) {
+        if (s=="@") ended=true; 
+
+        if (ended) continue;
+
+        if (s=="*") {
+            d=5; 
+            continue; 
+        }
+
+        int x=strtoint(s); 
+
+        if (d>=1) {
+            d--; 
+            money+=x*2; 
+        } else {
+            money+=x; 
+        }
+        
+        money=max(money, 0); 
+    }
+
+    cout<<money<<'\n'; 
+
+    return 0;
+}
+```
+
+
+> complexity: 
+> - time: $O(N)$ (他沒有給 $N$ ，反正會過)
+> - space: $O(1)$
+
 # Q2: 太空人多重？
 
 ## 題目 
@@ -123,6 +199,67 @@ output:
 Jimmy Earth 51.05
 Alice Mercury 51.05
 ```
+
+## 程式
+
+這題就是這樣，十分簡單，比較要注意是可能會有人一直想不到怎麼四捨五入到小數點後兩位，內建沒有，簡單的 `x=round(x*100)/100` 就可以了，不用想的太複雜
+
+這題我寫的時候不知道有 `cout<<fixed<<setprecision(2);` 可以用，我還自己寫了一個會在小數後面補 `0` 的
+
+然後我聽說其他學校有人星球用很多 `else if` 的，我是不建議啦：）
+
+```cpp=
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    map<string, double> g; 
+
+    g["Mercury"]=0.39; 
+    g["Venus"]=0.90; 
+    g["Earth"]=1.00; 
+    g["Mars"]=0.39; 
+    g["Jupiter"]=2.53; 
+    g["Saturn"]=1.07; 
+    g["Uranus"]=0.89; 
+    g["Neptune"]=1.14; 
+
+    vector<pair<double, pair<string, string>>> a; 
+
+    double m=0; 
+
+    for (int i=0; i<8; i++) {
+        string name, planet;
+        double weight; 
+        
+        cin>>name>>weight>>planet; 
+
+        double mass=weight/g[planet]; 
+        mass=round(mass*100)/100; // 取小數點後兩位
+
+        m=max(m, mass); 
+
+        a.push_back({mass, {name, planet}}); 
+    }
+
+    cout<<fixed<<setprecision(2); // 確定輸出會有兩位
+
+    for (int i=0; i<8; i++) {
+        if (a[i].first==m) {
+            cout<<a[i].second.first<<' '<<a[i].second.second<<' '<<a[i].first<<'\n'; 
+        }
+    }
+
+    return 0;
+}
+```
+
+> complexity: 
+> - time: $O(1)$ 
+> - space: $O(1)$ 
 
 # Q3: 晶片製造
 
@@ -192,13 +329,72 @@ output:
 63
 ```
 
+## 程式
+
+這題一看到 $N, M \le 100$ 就可以直接暴力，沒有任何問題
+
+```cpp=
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int N, M; cin>>N>>M; 
+
+    vector<vector<bool>> g(N, vector<bool> (M, true)); 
+
+    for (int i=0; i<N; i++) {
+        string s; 
+        cin>>s; 
+        for (int j=0; j<M; j++) {
+            if (s[j]=='-') g[i][j]=false; 
+        }
+    }
+
+    int sm=min(N, M); 
+    int res=0; 
+
+    for (int sz=1; sz<=sm; sz++) {
+        for (int x=0; x<N-sz+1; x++) { 
+            for (int y=0; y<M-sz+1; y++) { 
+                bool pos=true; 
+                
+                for (int cx=0; cx<sz; cx++) {
+                    for (int cy=0; cy<sz; cy++) {
+                        if (!g[x+cx][y+cy]) {
+                            pos=false; 
+                            break; 
+                        }
+                    }
+                    if (!pos) break; 
+                }
+
+                if (pos) res++; 
+            }
+        }
+    }
+
+    cout<<res<<'\n'; 
+
+    return 0;
+}
+```
+
+> complexity: 
+> - time: $O(NM \cdot min(N, M)^3)$
+> - space: $O(NM)$
+
 # Q4: 斜率計算
+
+> 注意：這題我寫的方法是用斜率最小的最遠點為 $M_k$ 但我其實忘記題目有沒有說要用最遠的，也忘記我比賽是寫用哪個點了
 
 今天在一個二維的坐標系中，給你 $K$ 個點的 $x, y$ 座標，每個點都在不同位置
 
 我們首先選擇 $x$ 最小的點 （$x$ 相同就選 $y$ 小的）作為 $M_s$ 
 
-接下來選擇 $x$ 最大的點 （$x$ 相同就選 $y$ 小的）作為 $M_e$ 
+接下來選擇 $x$ 最大的點 （$x$ 相同就選 $y$ 大的）作為 $M_e$ 
 
 在剩下的點中，我們要找出一個點 $M_k$，符合以下條件：
 
@@ -253,6 +449,66 @@ output:
 8 6
 13 12
 ```
+
+## 程式
+
+這題就真的算出來，題目需要讀一下，沒有很難懂，但我只拿 $11/15$ 我猜應該是判斷哪一個點出問題，因為我其實不記得斜率一樣要輸出哪個，我好像是都輸出，理論上 `double` 在這個範圍不會出現斜率一樣算出來不一樣的，如果範圍大一點，可能要用交叉相乘的。
+
+```cpp=
+#include <bits/stdc++.h>
+using namespace std;
+
+using pii=pair<int, int>; 
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int N; cin>>N; 
+
+    vector<pii> pt(N); 
+    for (auto &[x, y] : pt) cin>>x>>y; 
+
+    sort(pt.begin(), pt.end()); 
+    pii ms=pt[0]; 
+    pii me=pt[N-1]; 
+
+    double sm=numeric_limits<double>::max(); 
+
+    vector<pii> mk; 
+
+    for (int i=1; i<N-1; i++) {
+        pii cur=pt[i]; 
+        if (cur.first<=ms.first || cur.second<=ms.second || cur.first>=me.first || cur.second>=me.second) continue;
+
+        double m=(double)(cur.second-ms.second)/(cur.first-ms.first); 
+
+        if (m==sm) {
+            mk.push_back(cur); 
+        } else if (m<sm) {
+            sm=m; 
+            mk={cur}; 
+        }
+    }
+
+    if (mk.empty()) {
+        cout<<"Not found\n"; 
+        return 0; 
+    }
+
+    sort(mk.begin(), mk.end()); 
+
+    cout<<ms.first<<' '<<ms.second<<'\n'; 
+    for (auto &[x, y] : mk) cout<<x<<' '<<y<<'\n'; 
+    cout<<me.first<<' '<<me.second<<'\n'; 
+
+    return 0;
+}
+```
+
+> complexity: 
+> - time: $O(K log K)$
+> - space: $O(K)$
 
 # Q5: 小明借錢
 
@@ -322,6 +578,66 @@ output:
 182
 ```
 
+## 程式
+
+因為最大的答案差不多可以到 $N \cdot K_x$，也就是 $10^8$ ，所以寫個二分搜
+
+這題我寫得很順，然後一開始沒看到無條件進位，小問題
+
+這題有人寫暴力一個一個算拿到 $16/20$ ：/
+
+然後我現在寫才發現我沒有寫到避免要還的錢超過 `long long` 的 `break`，但我還是滿分，可見測資不怎麼好 
+
+```cpp=
+#include <bits/stdc++.h>
+using namespace std;
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    int N, R; cin>>N>>R;
+    vector<int> a(N); 
+    for (int &x : a) cin>>x; 
+
+    long long l=0, r=1e8; 
+
+    while (r!=l+1) {
+        long long mid=(r+l)/2; 
+
+        long long cur=mid; 
+
+        bool pos=false; 
+
+        for (int i=0; i<N; i++) {
+            cur=cur+(cur+R-1)/R; 
+            cur-=a[i]; 
+
+            if (cur<=0) {
+                pos=true; 
+                break; 
+            } 
+
+            if (cur>1e8) break; // 避免因為 R 過小而大幅度的增加
+        }
+
+        if (pos) {
+            l=mid; 
+        } else {
+            r=mid; 
+        }
+    }
+
+    cout<<l<<'\n'; 
+
+    return 0;
+}
+```
+
+> complexity:
+> - time: $O(N log A)$ ( $A$ 為二分搜上限)
+> - space: $O(N)$
+
 # Q6: 行星旅行
 
 ## 題目
@@ -387,3 +703,97 @@ output:
 ```
 4138.00
 ```
+
+## 程式
+
+這題難的在於要判斷是否會碰到太陽，我比賽當下一直寫不好，點線距我明明有記得
+
+這題是這場最難的，一個解出來而已，其實不是難，就麻煩，又壓軸
+
+我給的程式是用 Dijkstra，其實窮舉也會過
+
+然後這題我有用 `EPS` 來避免 `double` 有誤差，比賽中應該不用，畢竟他們的測資就那樣
+
+```cpp=
+#include <bits/stdc++.h>
+using namespace std;
+
+using pdd=pair<double, double>; 
+
+int main() {
+    ios::sync_with_stdio(false);
+    cin.tie(nullptr);
+
+    double sunR, maxD; 
+    int K; 
+    cin>>sunR>>maxD>>K; 
+
+    string s, t; cin>>s>>t; 
+
+    vector<pdd> pt(8); 
+    for (auto &[x, y] : pt) cin>>x>>y; 
+
+    // 依照與太陽的距離排序
+    sort(pt.begin(), pt.end(), [](pdd a, pdd b) {
+        return a.first*a.first+a.second*a.second < b.first*b.first+b.second*b.second; 
+    }); 
+
+    vector<string> names={"Mercury", "Venus", "Earth", "Mars", "Jupiter", "Saturn", "Uranus", "Neptune"}; 
+    int st=find(names.begin(), names.end(), s)-names.begin(); 
+    int ed=find(names.begin(), names.end(), t)-names.begin(); 
+
+    // 合法的線段
+    vector<vector<pair<int, double>>> adj(8); 
+
+    for (int i=0; i<8; i++) {
+        for (int j=0; j<8; j++) {
+            if (i==j) continue; 
+
+            auto [ax, ay]=pt[i]; 
+            auto [bx, by]=pt[j]; 
+
+            double dx=bx-ax, dy=by-ay; 
+            double d2=dx*dx+dy*dy; 
+
+            if (d2>maxD*maxD) continue;
+
+            double tt=-(ax*dx+ay*dy)/d2; 
+            tt=max(0.0, min(1.0, tt)); 
+            
+            constexpr double EPS=1e-9;
+
+            double px=ax+tt*dx, py=ay+tt*dy; 
+            if (px*px+py*py<=sunR*sunR+EPS) continue; 
+
+            adj[i].push_back({j, d2}); 
+        }
+    }
+
+    // dijkstra {花費, {行星, 步數}}
+    priority_queue<pair<double, pair<int, int>>, vector<pair<double, pair<int, int>>>, greater<>> pq; 
+
+    pq.push({0, {st, 0}}); 
+
+    while (!pq.empty()) {
+        auto [d, cur]=pq.top(); pq.pop(); 
+        auto [u, k]=cur; 
+
+        if (u==ed) {
+            cout<<fixed<<setprecision(2)<<d<<'\n'; 
+            return 0; 
+        }
+
+        if (k==K) continue; 
+
+        for (auto [v, w] : adj[u]) pq.push({d+w, {v, k+1}}); 
+    }
+
+    cout<<"UNREACHABLE\n"; 
+
+    return 0;
+}
+```
+
+> complexity
+> - time: $O(7^K \cdot K)$
+> - space: $O(7^K)$
