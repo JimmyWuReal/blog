@@ -3,12 +3,15 @@
 @import '@fontsource/inter/500.css';
 @import '@fontsource/inter/600.css';
 @import '@fontsource/dm-mono/400.css';
+@import '@fontsource/jetbrains-mono/400.css';
 @import 'katex/dist/katex.min.css';
 
 @theme {
   /* Inter has no CJK glyphs, so Chinese falls back to the system's Traditional Chinese font. */
   --font-sans: Inter, 'PingFang TC', 'Noto Sans TC', 'Microsoft JhengHei', ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'DM Mono', ui-monospace, 'PingFang TC', 'Noto Sans TC', monospace;
+  /* Code (inline and blocks) uses JetBrains Mono; DM Mono stays for metadata. */
+  --font-code: 'JetBrains Mono', ui-monospace, 'PingFang TC', 'Noto Sans TC', monospace;
 }
 
 :root {
