@@ -15,6 +15,8 @@ interface Props {
 const { entry, prev, next } = Astro.props;
 const { Content, headings } = await render(entry);
 const toc = headings.filter((h) => h.depth >= 1 && h.depth <= 3);
+// Indent each level relative to the shallowest heading, so a post without an H1 isn't shifted right
+const tocBase = Math.min(...toc.map((h) => h.depth));
 ---
 
 <div class="flex justify-center gap-14 px-4 py-10 sm:px-10 lg:py-16">
@@ -70,7 +72,7 @@ const toc = headings.filter((h) => h.depth >= 1 && h.depth <= 3);
           <p class="mb-3 text-[12px] font-medium text-[#6f6f6f]">On this page</p>
           <ul class="flex flex-col gap-2">
             {toc.map((h) => (
-              <li class={h.depth === 3 ? 'pl-3' : ''}>
+              <li style={{ paddingLeft: `${(h.depth - tocBase) * 12}px` }}>
                 <a href={`#${h.slug}`} class="toc-link block text-[12.5px] leading-[1.45] text-[#7d7d7d] no-underline hover:text-white">
                   {h.text}
                 </a>
