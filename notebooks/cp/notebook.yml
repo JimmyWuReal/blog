@@ -13,6 +13,7 @@ sections:
     notes:
       - basics/starting-template
       - basics/input
+      - basics/complexity
 
   - section: Math
     notes:
