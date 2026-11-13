@@ -19,7 +19,7 @@ const sections = items.filter(isSection);
     notes.length > 0 && (
       <ul class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
         {notes.map((note) => (
-          <li class="relative flex flex-col gap-2 rounded-2xl bg-[#111] p-5 hover:bg-[#161616]">
+          <li class="relative flex flex-col gap-2 rounded-2xl bg-[#111] p-5 transition-colors duration-200 ease-out hover:bg-[#161616]">
             <a href={entryUrl(note)} class="text-[15px] font-medium tracking-[-0.01em] text-[#efefef] no-underline after:absolute after:inset-0 after:rounded-2xl">
               {note.data.title}
             </a>
