@@ -15,8 +15,7 @@ const { notebook } = Astro.props as { notebook: Notebook };
 <Listing title={notebook.title} description={notebook.description} image={`/og/${notebook.slug}.png`} back={{ href: '/', title: notebook.title }}>
   {/* The title lives in the nav bar; the h1 stays for screen readers. */}
   <h1 class="sr-only">{notebook.title}</h1>
-  {notebook.description && <p class="m-0 text-[14px] text-[#7d7d7d]">{notebook.description}</p>}
-  <div class="mt-10 flex flex-col gap-14">
+  <div class="flex flex-col gap-14">
     {
       notebook.sections.map((section) => (
         <section class="flex flex-col gap-5">
