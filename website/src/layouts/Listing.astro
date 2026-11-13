@@ -8,12 +8,16 @@ interface Props {
   description?: string;
   /** Open Graph image path; defaults to the home page's. */
   image?: string;
+  /** Show only a back button and this title in the header, as on a notebook's contents page. */
+  back?: { href: string; title: string };
 }
+
+const { back, ...base } = Astro.props;
 ---
 
-<Base {...Astro.props}>
+<Base {...base}>
   <div class="mx-auto max-w-[1120px] px-4 pt-8 pb-24 sm:px-10">
-    <SiteHeader />
+    <SiteHeader back={back} />
     <main class="mt-16 sm:mt-20">
       <slot />
     </main>

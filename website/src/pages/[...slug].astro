@@ -9,9 +9,9 @@ import { getPosts } from '../lib/site';
 
 export async function getStaticPaths() {
   const notes = (await getNotebooks()).flatMap((notebook) =>
-    notebook.order.map((note, i, order) => ({
+    notebook.order.map((note) => ({
       params: { slug: note.id },
-      props: { kind: 'note' as const, entry: note, notebook, prev: order[i - 1], next: order[i + 1] },
+      props: { kind: 'note' as const, entry: note, notebook },
     })),
   );
   const posts = (await getPosts()).map((post) => ({
@@ -27,7 +27,7 @@ const props = Astro.props;
 {
   props.kind === 'note' ? (
     <NotebookPage notebook={props.notebook} note={props.entry}>
-      <Article entry={props.entry} prev={props.prev} next={props.next} />
+      <Article entry={props.entry} />
     </NotebookPage>
   ) : (
     <Base title={props.entry.data.title} description={props.entry.data.description} image={`/og/${props.entry.id}.png`} type="article">

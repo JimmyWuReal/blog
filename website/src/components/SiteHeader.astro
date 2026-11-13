@@ -1,9 +1,24 @@
 ---
-// Top bar on the home, notebook contents, tag, post, and 404 pages.
-import { SITE_TITLE } from '../lib/site';
+// Top bar on the home, notebook contents, tag, post, and 404 pages. With `back`, it shows only a
+// back button and that page's title (the notebook contents page).
+import BackLink from './BackLink.astro';
+
+interface Props {
+  back?: { href: string; title: string };
+}
+
+const { back } = Astro.props;
 ---
 
-<header class="flex items-center justify-between gap-6">
-  <a href="/" class="text-[15px] font-semibold tracking-[-0.035em] text-[#efefef] no-underline">{SITE_TITLE}</a>
-  <a href="https://jimmywu.app" class="text-[13px] font-medium tracking-[-0.01em] text-[#8a8a8a] no-underline hover:text-white">jimmywu.app</a>
+<header class="flex min-h-[28px] items-center justify-between gap-6">
+  {
+    back ? (
+      <BackLink href={back.href} title={back.title} />
+    ) : (
+      <>
+        <a href="/" class="text-[15px] font-semibold tracking-[-0.035em] text-[#efefef] no-underline">Blogs</a>
+        <span class="text-[13px] font-medium tracking-[-0.01em] text-[#8a8a8a]">By Jimmy Wu</span>
+      </>
+    )
+  }
 </header>

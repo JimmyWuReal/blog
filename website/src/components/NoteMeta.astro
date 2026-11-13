@@ -1,28 +1,33 @@
 ---
-// A post's or note's tags and difficulty from its frontmatter. Renders nothing if it has neither.
-import type { Entry } from '../lib/site';
+// A post's or note's date, authors, tags, and difficulty, all in DM Mono so the meta reads as one.
+import { formatAuthors, formatDate, type Entry } from '../lib/site';
 
 interface Props {
   entry: Entry;
 }
 
-const { tags, difficulty } = Astro.props.entry.data;
+const { date, author, tags, difficulty } = Astro.props.entry.data;
 ---
 
-{
-  (tags.length > 0 || difficulty !== undefined) && (
-    <div class="flex flex-wrap items-center gap-2">
-      {tags.map((tag) => (
-        <a class="tag" href={`/tags/${encodeURIComponent(tag)}`}>
-          {tag}
-        </a>
-      ))}
-      {difficulty !== undefined && (
-        <span class="mono-value ml-1" title="Difficulty, 0 (easiest) to 10">
-          <span class="text-[#6f6f6f]">Difficulty </span>
-          {difficulty}/10
-        </span>
-      )}
-    </div>
-  )
-}
+<div class="flex flex-col gap-3 font-[DM_Mono,ui-monospace,monospace] text-[12px] text-[#8a8a8a] tabular-nums">
+  <p class="m-0 leading-relaxed [overflow-wrap:anywhere]">
+    {date && <><time datetime={formatDate(date)}>{formatDate(date)}</time>{' · '}</>}
+    by {formatAuthors(author)}
+  </p>
+  {
+    (tags.length > 0 || difficulty !== undefined) && (
+      <div class="relative flex flex-wrap items-center gap-2">
+        {tags.map((tag) => (
+          <a class="tag" href={`/tags/${encodeURIComponent(tag)}`}>
+            {tag}
+          </a>
+        ))}
+        {difficulty !== undefined && (
+          <span class="tag" title="Difficulty, 0 (easiest) to 10">
+            difficulty {difficulty}/10
+          </span>
+        )}
+      </div>
+    )
+  }
+</div>

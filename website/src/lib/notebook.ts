@@ -1,5 +1,5 @@
 // Reads every notebooks/<slug>/notebook.yml and pairs it with that folder's notes, so
-// pages can render the sidebar, the contents page, and previous / next links.
+// pages can render the sidebar and the contents page.
 import { getCollection, type CollectionEntry } from 'astro:content';
 import { parse } from 'yaml';
 

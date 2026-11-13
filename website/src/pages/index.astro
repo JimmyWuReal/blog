@@ -22,7 +22,7 @@ const posts = await getPosts();
                 {notebook.title}
               </a>
               {notebook.description && <p class="m-0 line-clamp-2 text-[12.5px] leading-[1.7] text-[#7d7d7d]">{notebook.description}</p>}
-              <span class="mono-value mt-auto pt-2 text-[#6f6f6f]">{plural(notebook.order.length, 'note')}</span>
+              <span class="mt-auto pt-3 font-[DM_Mono,ui-monospace,monospace] text-[12px] text-[#8a8a8a] tabular-nums">{plural(notebook.order.length, 'note')}</span>
             </li>
           ))
         }

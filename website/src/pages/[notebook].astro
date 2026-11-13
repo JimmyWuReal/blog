@@ -1,5 +1,6 @@
 ---
 // A notebook's contents page (/cp): every section and note from its notebook.yml, as card grids.
+// The nav bar shows only a back button and the notebook's title.
 import Listing from '../layouts/Listing.astro';
 import NoteGrid from '../components/NoteGrid.astro';
 import { getNotebooks, type Notebook } from '../lib/notebook';
@@ -11,10 +12,11 @@ export async function getStaticPaths() {
 const { notebook } = Astro.props as { notebook: Notebook };
 ---
 
-<Listing title={notebook.title} description={notebook.description} image={`/og/${notebook.slug}.png`}>
-  <h1 class="m-0 text-[32px] leading-[1.15] font-medium tracking-[-0.045em] sm:text-[36px]">{notebook.title}</h1>
-  {notebook.description && <p class="mt-3 text-[14px] text-[#7d7d7d]">{notebook.description}</p>}
-  <div class="mt-14 flex flex-col gap-14">
+<Listing title={notebook.title} description={notebook.description} image={`/og/${notebook.slug}.png`} back={{ href: '/', title: notebook.title }}>
+  {/* The title lives in the nav bar; the h1 stays for screen readers. */}
+  <h1 class="sr-only">{notebook.title}</h1>
+  {notebook.description && <p class="m-0 text-[14px] text-[#7d7d7d]">{notebook.description}</p>}
+  <div class="mt-10 flex flex-col gap-14">
     {
       notebook.sections.map((section) => (
         <section class="flex flex-col gap-5">
