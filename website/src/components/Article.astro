@@ -233,10 +233,17 @@ const tocBase = Math.min(...toc.map((h) => h.depth));
 
   links.forEach((link, i) =>
     link.addEventListener('click', (event) => {
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       const target = targets[i];
       if (!target) return;
       event.preventDefault();
       history.pushState(null, '', link.hash);
+      // Keep keyboard navigation at the destination, as with a native fragment link.
+      if (!target.hasAttribute('tabindex')) {
+        target.setAttribute('tabindex', '-1');
+        target.addEventListener('blur', () => target.removeAttribute('tabindex'), { once: true });
+      }
+      target.focus({ preventScroll: true });
       activate(i);
       locked = true;
       unlockWhenStill();
