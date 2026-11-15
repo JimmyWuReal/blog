@@ -1,8 +1,9 @@
 ---
 // A live view count from Convex: " · 1,234 views", or "1,234 views" with an empty prefix.
 // `count` adds a view of the post or note at `path` (once per browser tab); otherwise the count is
-// only read, as for a notebook's total or a card. Stays hidden until the count loads, and
-// entirely when CONVEX_URL isn't set.
+// only read, as for a notebook's total or a card. The script in layouts/Base.astro fills it in;
+// it stays invisible (but keeps its prefix's space) until then, and isn't rendered at all when
+// CONVEX_URL isn't set.
 interface Props {
   /** A counter from viewPath (cp/math/fast-power, posts/hello) or a notebook slug (cp). */
   path: string;
@@ -17,35 +18,12 @@ const url = import.meta.env.CONVEX_URL;
 
 {
   url && (
-    <span hidden data-views={path} data-count={count ? '' : undefined} data-convex-url={url}>
+    <span
+      data-views={path}
+      data-count={count ? '' : undefined}
+      class="opacity-0 transition-opacity duration-300 ease-out data-loaded:opacity-100 motion-reduce:transition-none"
+    >
       {prefix}<span data-views-value />
     </span>
   )
 }
-
-<script>
-  import { ConvexHttpClient } from 'convex/browser';
-  import { api } from '../../convex/_generated/api';
-
-  for (const el of document.querySelectorAll<HTMLElement>('[data-views]')) {
-    const client = new ConvexHttpClient(el.dataset.convexUrl!);
-    const path = el.dataset.views!;
-    // A reload in the same tab reads the count instead of adding another view.
-    let seen = true;
-    if (el.dataset.count !== undefined) {
-      try {
-        seen = sessionStorage.getItem(`viewed:${path}`) !== null;
-        sessionStorage.setItem(`viewed:${path}`, '');
-      } catch {
-        seen = false;
-      }
-    }
-    const views = seen ? client.query(api.views.get, { path }) : client.mutation(api.views.hit, { path });
-    views
-      .then((n) => {
-        el.querySelector('[data-views-value]')!.textContent = `${n.toLocaleString('en-US')} ${n === 1 ? 'view' : 'views'}`;
-        el.hidden = false;
-      })
-      .catch(() => {});
-  }
-</script>
