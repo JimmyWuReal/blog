@@ -56,20 +56,16 @@ const convexUrl = import.meta.env.CONVEX_URL;
     {
       convexUrl && (
         <script is:inline define:vars={{ convexUrl }}>
-          // Fills every ViewCount on the page. It's inline at the end of the body and calls
-          // Convex's HTTP API with plain fetch (no Convex client to download), so the requests
-          // start as soon as the page is parsed.
+          // Brings every ViewCount up to date. Each already shows the count from the build; this
+          // swaps in a newer one without hiding it first. It's inline at the end of the body and
+          // calls Convex's HTTP API with plain fetch (no Convex client to download), so the
+          // requests start as soon as the page is parsed.
           for (const el of document.querySelectorAll('[data-views]')) {
             const path = el.dataset.views;
             const show = (n) => {
               el.querySelector('[data-views-value]').textContent = `${n.toLocaleString('en-US')} ${n === 1 ? 'view' : 'views'}`;
-              el.dataset.loaded = '';
+              el.hidden = false;
             };
-            // Show the last count this browser saw right away; the live count replaces it.
-            try {
-              const last = localStorage.getItem(`views:${path}`);
-              if (last !== null) show(Number(last));
-            } catch {}
             // A reload in the same tab reads the count instead of adding another view.
             let seen = true;
             if (el.dataset.count !== undefined) {
@@ -80,6 +76,13 @@ const convexUrl = import.meta.env.CONVEX_URL;
                 seen = false;
               }
             }
+            // Before the first paint: if this browser has seen a newer count than the build's,
+            // show that instead (plus this view, when it's about to be counted).
+            try {
+              const last = localStorage.getItem(`views:${path}`);
+              const guess = last === null ? -1 : Number(last) + (seen ? 0 : 1);
+              if (guess > Number(el.dataset.n ?? -1)) show(guess);
+            } catch {}
             fetch(`${convexUrl}/api/${seen ? 'query' : 'mutation'}`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
