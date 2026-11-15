@@ -2,6 +2,7 @@
 // Home: every blog post (newest first) right under the header, then every notebook.
 import Listing from '../layouts/Listing.astro';
 import NoteGrid from '../components/NoteGrid.astro';
+import ViewCount from '../components/ViewCount.astro';
 import { getNotebooks } from '../lib/notebook';
 import { SITE_TITLE, getPosts, plural } from '../lib/site';
 
@@ -24,7 +25,9 @@ const posts = await getPosts();
                 {notebook.title}
               </a>
               {notebook.description && <p class="m-0 line-clamp-2 text-[12.5px] leading-[1.7] text-[#7d7d7d]">{notebook.description}</p>}
-              <span class="mt-auto pt-3 font-[DM_Mono,ui-monospace,monospace] text-[12px] text-[#8a8a8a] tabular-nums">{plural(notebook.order.length, 'note')}</span>
+              <span class="mt-auto pt-3 font-[DM_Mono,ui-monospace,monospace] text-[12px] text-[#8a8a8a] tabular-nums">
+                {plural(notebook.order.length, 'note')}<ViewCount path={notebook.slug} />
+              </span>
             </li>
           ))
         }

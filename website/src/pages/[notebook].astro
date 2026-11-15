@@ -3,7 +3,6 @@
 // The nav bar shows only a back button and the notebook's title.
 import Listing from '../layouts/Listing.astro';
 import NoteGrid from '../components/NoteGrid.astro';
-import ViewCount from '../components/ViewCount.astro';
 import { plural } from '../lib/site';
 import { getNotebooks, type Notebook } from '../lib/notebook';
 
@@ -18,7 +17,7 @@ const { notebook } = Astro.props as { notebook: Notebook };
   {/* The title lives in the nav bar; the h1 stays for screen readers. */}
   <h1 class="sr-only">{notebook.title}</h1>
   <p class="m-0 font-[DM_Mono,ui-monospace,monospace] text-[12px] text-[#8a8a8a] tabular-nums">
-    {plural(notebook.order.length, 'note')}<ViewCount path={notebook.slug} />
+    {plural(notebook.order.length, 'note')}
   </p>
   <div class="mt-14 flex flex-col gap-14">
     {
