@@ -1,10 +1,9 @@
 ---
-// A note's page: the centered note with a nav bar showing only a back button and the latest
-// page's title. It starts at the notebook's contents, and Base's script points it at the last
-// note or notebook the reader came from.
+// A note's page: the nav bar reads "Notebook / Note". Its back button starts at the notebook's
+// contents, and Base's script points it at the last note or notebook the reader came from.
 import Base from './Base.astro';
 import Article from '../components/Article.astro';
-import BackLink from '../components/BackLink.astro';
+import SiteHeader from '../components/SiteHeader.astro';
 import type { Note, Notebook } from '../lib/notebook';
 
 interface Props {
@@ -16,7 +15,6 @@ const { notebook, note } = Astro.props;
 ---
 
 <Base title={note.data.title} context={notebook.title} description={note.data.description} image={`/og/${note.id}.png`} type="article" kind="note">
-  <Article entry={note}>
-    <BackLink slot="nav" href={`/${notebook.slug}`} title={notebook.title} latest />
-  </Article>
+  <SiteHeader back={`/${notebook.slug}`} latest crumbs={[{ title: notebook.title, href: `/${notebook.slug}` }, { title: note.data.title }]} />
+  <Article entry={note} />
 </Base>

@@ -3,7 +3,7 @@
 import Base from '../layouts/Base.astro';
 import NotebookPage from '../layouts/NotebookPage.astro';
 import Article from '../components/Article.astro';
-import BackLink from '../components/BackLink.astro';
+import SiteHeader from '../components/SiteHeader.astro';
 import { getNotebooks } from '../lib/notebook';
 import { getPosts } from '../lib/site';
 
@@ -29,9 +29,8 @@ const props = Astro.props;
     <NotebookPage notebook={props.notebook} note={props.entry} />
   ) : (
     <Base title={props.entry.data.title} description={props.entry.data.description} image={`/og/${props.entry.id}.png`} type="article">
-      <Article entry={props.entry}>
-        <BackLink slot="nav" href="/" title="Blogs" />
-      </Article>
+      <SiteHeader back="/" crumbs={[{ title: 'Blogs', href: '/' }, { title: props.entry.data.title }]} />
+      <Article entry={props.entry} />
     </Base>
   )
 }

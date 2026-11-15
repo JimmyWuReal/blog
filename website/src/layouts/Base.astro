@@ -13,7 +13,7 @@ interface Props {
   image?: string;
   /** `article` for posts and notes, `website` for everything else. */
   type?: 'website' | 'article';
-  /** Notes and notebook contents pages are where a note's back link can return to. */
+  /** Notes and notebook contents pages are where a note's back button can return to. */
   kind?: 'note' | 'notebook';
 }
 
@@ -55,7 +55,7 @@ const imageUrl = new URL(image, Astro.site);
 
 <script>
   // Keep this tab's visits as a stack in sessionStorage (following a link pushes, going
-  // back to the previous page pops), so a note's back link can return to the page the
+  // back to the previous page pops), so a note's back button can return to the page the
   // reader came from when that page is a note or a notebook.
   type Visit = { url: string; title: string; kind?: string };
   const KEY = 'visits';
@@ -80,9 +80,6 @@ const imageUrl = new URL(image, Astro.site);
 
     const back = document.querySelector<HTMLAnchorElement>('[data-back]');
     const prev = visits.at(-2);
-    if (back && prev?.kind) {
-      back.href = prev.url;
-      document.querySelector('[data-back-label]')!.textContent = prev.title;
-    }
+    if (back && prev?.kind) back.href = prev.url;
   });
 </script>
