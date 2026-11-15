@@ -28,6 +28,10 @@
 }
 
 body { margin: 0; background: #090909; -webkit-font-smoothing: antialiased; }
+
+/* The page still scrolls, without a visible scrollbar */
+html { scrollbar-width: none; }
+html::-webkit-scrollbar { display: none; }
 button { font: inherit; color: inherit; }
 
 a:focus-visible, button:focus-visible {

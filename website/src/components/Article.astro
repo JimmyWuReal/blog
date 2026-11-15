@@ -42,12 +42,12 @@ const tocBase = Math.min(...toc.map((h) => h.depth));
 
   {
     toc.length > 0 && (
-      <aside class="toc-scroller pointer-events-none sticky top-[84px] z-10 -mt-3 hidden max-h-[calc(100vh-7rem)] self-start overflow-y-auto py-3 xl:col-start-1 xl:col-end-3 xl:row-start-1 xl:grid xl:grid-cols-subgrid">
+      <aside class="toc-scroller sticky top-[84px] z-10 -mx-4 -mt-3 hidden max-h-[calc(100vh-7rem)] self-start overflow-y-auto px-4 py-3 xl:col-start-1 xl:row-start-1 xl:block">
         <!-- "On this page" as quiet ticks: longer = higher level. Hovering (or tabbing into) the
              ticks opens a panel with the titles; one white marker glides to the section being read.
-             The aside spans the TOC column and the article (via subgrid) so that panel can open over
-             the note without being clipped by the scroller. Only the nav takes the pointer. -->
-        <nav aria-label="On this page" class="toc pointer-events-auto justify-self-end" data-toc>
+             The panel stays inside the TOC column and its gap, never over the note; the aside's
+             padding gives it room so the scroller doesn't clip its edges. -->
+        <nav aria-label="On this page" class="toc" data-toc>
           <ul>
             {toc.map((h) => (
               <li style={`--level:${h.depth - tocBase}`}>
@@ -69,7 +69,7 @@ const tocBase = Math.min(...toc.map((h) => h.depth));
   .toc-scroller { scrollbar-width: none; }
   .toc-scroller::-webkit-scrollbar { display: none; }
 
-  .toc { position: relative; isolation: isolate; width: 20px; }
+  .toc { position: relative; isolation: isolate; }
   .toc ul { margin: 0; padding: 0; list-style: none; }
 
   /* Fixed 24px rows keep the ticks evenly spaced; titles are laid over the note, not in the row */
@@ -92,7 +92,7 @@ const tocBase = Math.min(...toc.map((h) => h.depth));
     position: absolute;
     top: 0;
     left: 32px;
-    width: 220px;
+    right: 0;
     padding-left: calc(var(--level) * 10px);
     overflow: hidden;
     font-size: 12.5px;
@@ -108,8 +108,7 @@ const tocBase = Math.min(...toc.map((h) => h.depth));
   .toc-link:hover .toc-label,
   .toc-link.is-active .toc-label { color: #fff; }
 
-  /* The panel behind the ticks and titles. It covers the note with a blurred glass so the text
-     underneath fades back instead of fighting the titles. */
+  /* The panel behind the ticks and titles, raised off the page like the kit's menus */
   .toc::before {
     content: '';
     position: absolute;
@@ -117,12 +116,10 @@ const tocBase = Math.min(...toc.map((h) => h.depth));
     top: -10px;
     bottom: -10px;
     left: -14px;
-    width: 280px;
+    right: -14px;
     border-radius: 12px;
-    background: rgba(20, 20, 20, 0.82);
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07), 0 16px 40px rgba(0, 0, 0, 0.45);
-    -webkit-backdrop-filter: blur(14px);
-    backdrop-filter: blur(14px);
+    background: #141414;
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
     transform-origin: 0 0;
     visibility: hidden;
     opacity: 0;
@@ -208,7 +205,16 @@ const tocBase = Math.min(...toc.map((h) => h.depth));
   const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
   let frame = 0;
   let current = -1;
-  let locked = false; // while a click's smooth scroll runs, keep the clicked section active
+  // While a click's smooth scroll runs, keep the clicked section active instead of stepping through
+  // every section on the way. Unlock once the page has been still for a moment; this works in every
+  // browser, unlike scrollend. The spy then waits for the next real scroll, so a section near the
+  // page bottom that can't reach the top stays active after its click.
+  let locked = false;
+  let unlockTimer = 0;
+  const unlockWhenStill = () => {
+    clearTimeout(unlockTimer);
+    unlockTimer = window.setTimeout(() => (locked = false), 150);
+  };
 
   const place = () => {
     const tick = links[current]?.querySelector<HTMLElement>('.toc-tick');
@@ -249,17 +255,13 @@ const tocBase = Math.min(...toc.map((h) => h.depth));
       history.pushState(null, '', link.hash);
       activate(i);
       locked = true;
-      // Hand back to the scroll spy once the scroll settles. It only re-reads on the next scroll, so a
-      // section near the page bottom that can't reach the top stays active after its click.
-      const unlock = () => (locked = false);
-      addEventListener('scrollend', unlock, { once: true });
-      setTimeout(unlock, 1500); // no scrollend when the page is already there, or in older browsers
+      unlockWhenStill();
       target.scrollIntoView({ behavior: reduceMotion.matches ? 'auto' : 'smooth', block: 'start' });
     }),
   );
 
   if (links.length) {
-    addEventListener('scroll', () => (frame ||= requestAnimationFrame(spy)), { passive: true });
+    addEventListener('scroll', () => (locked ? unlockWhenStill() : (frame ||= requestAnimationFrame(spy))), { passive: true });
     // Fonts and the xl breakpoint can move the ticks, so re-measure without changing the section
     addEventListener('resize', place);
     document.fonts?.ready.then(place);
