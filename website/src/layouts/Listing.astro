@@ -10,6 +10,8 @@ interface Props {
   image?: string;
   /** Show only a back button and this title in the header, as on a notebook's contents page. */
   back?: { href: string; title: string };
+  /** Lets a note's back link return to this page; see Base. */
+  kind?: 'notebook';
 }
 
 const { back, ...base } = Astro.props;

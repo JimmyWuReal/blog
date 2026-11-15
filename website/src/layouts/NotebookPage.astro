@@ -1,9 +1,8 @@
 ---
-// A note's page in HackMD's book layout: the notebook tree beside the note. On small
-// screens the tree moves into a full-screen menu. The nav shows only a back button (to the
-// notebook's contents) and the notebook's title.
+// A note's page: a nav bar above the centered note. The nav shows only a back button and the
+// latest page's title; it starts at the notebook's contents, and Base's script points it at
+// the last note or notebook the reader came from.
 import Base from './Base.astro';
-import Sidebar from '../components/Sidebar.astro';
 import BackLink from '../components/BackLink.astro';
 import type { Note, Notebook } from '../lib/notebook';
 
@@ -13,44 +12,11 @@ interface Props {
 }
 
 const { notebook, note } = Astro.props;
-const home = `/${notebook.slug}`;
 ---
 
-<Base title={note.data.title} context={notebook.title} description={note.data.description} image={`/og/${note.id}.png`} type="article">
-  <div class="mx-auto flex max-w-[1480px]">
-    <aside class="sticky top-0 hidden h-screen w-[264px] shrink-0 overflow-y-auto px-5 py-8 lg:block">
-      <div class="mb-8 px-[4px]"><BackLink href={home} title={notebook.title} /></div>
-      <Sidebar notebook={notebook} currentId={note.id} />
-    </aside>
-
-    <div class="min-w-0 flex-1">
-      <header class="flex items-center justify-between gap-4 px-4 pt-4 lg:hidden">
-        <BackLink href={home} title={notebook.title} />
-        <button class="icon-button" type="button" aria-label="Open notebook menu" data-menu-open>
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16" /></svg>
-        </button>
-      </header>
-      <slot />
-    </div>
-  </div>
-
-  <dialog class="menu-dialog" aria-label="Notebook" data-menu>
-    <div class="flex items-center justify-between gap-4 px-4 pt-4">
-      <BackLink href={home} title={notebook.title} />
-      <button class="icon-button" type="button" aria-label="Close notebook menu" data-menu-close>
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12" /></svg>
-      </button>
-    </div>
-    <div class="px-[6px] py-8">
-      <Sidebar notebook={notebook} currentId={note.id} />
-    </div>
-  </dialog>
+<Base title={note.data.title} context={notebook.title} description={note.data.description} image={`/og/${note.id}.png`} type="article" kind="note">
+  <header class="mx-auto flex min-h-[28px] max-w-[1120px] items-center px-4 pt-8 sm:px-10">
+    <BackLink href={`/${notebook.slug}`} title={notebook.title} latest />
+  </header>
+  <slot />
 </Base>
-
-<script>
-  // Mobile notebook menu
-  const menu = document.querySelector<HTMLDialogElement>('[data-menu]')!;
-  document.querySelector('[data-menu-open]')?.addEventListener('click', () => menu.showModal());
-  document.querySelector('[data-menu-close]')?.addEventListener('click', () => menu.close());
-  matchMedia('(min-width: 1024px)').addEventListener('change', (e) => e.matches && menu.close());
-</script>

@@ -13,9 +13,11 @@ interface Props {
   image?: string;
   /** `article` for posts and notes, `website` for everything else. */
   type?: 'website' | 'article';
+  /** Notes and notebook contents pages are where a note's back link can return to. */
+  kind?: 'note' | 'notebook';
 }
 
-const { title, context = SITE_TITLE, description, image = '/og/index.png', type = 'website' } = Astro.props;
+const { title, context = SITE_TITLE, description, image = '/og/index.png', type = 'website', kind } = Astro.props;
 const fullTitle = title ? `${title} · ${context}` : SITE_TITLE;
 // In the build, pathname is the output file (/math/fast-power.html, /index.html); the
 // public URL drops the extension, and the home page is /.
@@ -46,7 +48,41 @@ const imageUrl = new URL(image, Astro.site);
     <meta property="og:image:alt" content={fullTitle} />
     <meta name="twitter:card" content="summary_large_image" />
   </head>
-  <body>
+  <body data-page-title={title ?? SITE_TITLE} data-page-kind={kind}>
     <slot />
   </body>
 </html>
+
+<script>
+  // Keep this tab's visits as a stack in sessionStorage (following a link pushes, going
+  // back to the previous page pops), so a note's back link can return to the page the
+  // reader came from when that page is a note or a notebook.
+  type Visit = { url: string; title: string; kind?: string };
+  const KEY = 'visits';
+
+  const load = (): Visit[] => {
+    try {
+      return JSON.parse(sessionStorage.getItem(KEY) ?? '[]');
+    } catch {
+      return [];
+    }
+  };
+
+  addEventListener('pageshow', () => {
+    const url = location.pathname;
+    const { pageTitle = '', pageKind } = document.body.dataset;
+    const visits = load();
+    if (visits.at(-2)?.url === url) visits.pop();
+    else if (visits.at(-1)?.url !== url) visits.push({ url, title: pageTitle, kind: pageKind });
+    try {
+      sessionStorage.setItem(KEY, JSON.stringify(visits.slice(-50)));
+    } catch {}
+
+    const back = document.querySelector<HTMLAnchorElement>('[data-back]');
+    const prev = visits.at(-2);
+    if (back && prev?.kind) {
+      back.href = prev.url;
+      document.querySelector('[data-back-label]')!.textContent = prev.title;
+    }
+  });
+</script>
