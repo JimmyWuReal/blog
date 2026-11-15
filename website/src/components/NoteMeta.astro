@@ -1,5 +1,6 @@
 ---
 // A post's or note's date, authors, tags, and difficulty, all in DM Mono so the meta reads as one.
+// Slotted content, such as the article's view count, ends the date and author line.
 import { formatAuthors, formatDate, type Entry } from '../lib/site';
 
 interface Props {
@@ -13,6 +14,7 @@ const { date, author, tags, difficulty } = Astro.props.entry.data;
   <p class="m-0 leading-relaxed [overflow-wrap:anywhere]">
     {date && <><time datetime={formatDate(date)}>{formatDate(date)}</time>{' · '}</>}
     by {formatAuthors(author)}
+    <slot />
   </p>
   {
     (tags.length > 0 || difficulty !== undefined) && (

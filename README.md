@@ -1,118 +1,116 @@
 # blog
 
-Jimmy Wu's blog and notebooks, published at **https://blog.jimmywu.app**.
+Jimmy Wu 的部落格與筆記，網址：**https://blog.jimmywu.app**
 
 ```
-blogs/       blog posts: one .md file per post
-notebooks/   notebooks: one folder per notebook, with a notebook.yml and its notes
-website/     the Astro site that renders both
+blogs/       部落格文章，一篇一個 .md
+notebooks/   筆記本，一個資料夾一本，內含 notebook.yml 與筆記
+website/     產生網站的 Astro 專案
 ```
 
-Edit anything in `blogs/` or `notebooks/` and push to `main`. Cloudflare Pages rebuilds and deploys the site in about a minute.
+改完內容 push 到 `main`，Cloudflare Pages 約一分鐘後自動更新網站。
 
-## Writing a blog post
+## 寫文章
 
-Create a `.md` file under `blogs/`, e.g. `blogs/hello.md`. It's published at `blog.jimmywu.app/hello`, and the home page lists posts newest first.
+在 `blogs/` 新增 `.md`，例如 `blogs/hello.md` → `blog.jimmywu.app/hello`。
 
 ```md
 ---
 title: Hello
-description: The first post.
+description: 第一篇文章
 date: 2026-11-08
 tags: [life]
 ---
 
-Text starts here. The page's title comes from `title`, so don't repeat it as a `# heading`.
+內文從這裡開始，標題由 `title` 產生，不用再寫 `# 標題`。
 ```
 
-A post needs a `date`. Add `draft: true` to keep a post off the site while you write it.
+- 文章必須有 `date`，首頁依日期由新到舊排列。
+- 檔名不能和筆記本、`tags`、`og`、`index`、`404` 同名。
 
-A post can't use a notebook's folder name or `tags`, `og`, `index`, or `404` as its URL. The build fails if one does.
+## 寫筆記
 
-## Writing a note
+`notebooks/` 底下每個資料夾是一本筆記本，資料夾名稱就是網址：`notebooks/cp/` → `blog.jimmywu.app/cp`。
 
-Each folder in `notebooks/` is one notebook, and its folder name is its URL: `notebooks/cp/` → `blog.jimmywu.app/cp`.
-
-1. Create a `.md` file in the notebook, e.g. `notebooks/cp/graph/dijkstra.md`.
-2. Add its path to that notebook's `notebook.yml` where it should appear in the sidebar. Notes left out of `notebook.yml` are drafts and aren't published.
+1. 新增 `.md`，例如 `notebooks/cp/graph/dijkstra.md` → `blog.jimmywu.app/cp/graph/dijkstra`。
+2. 把路徑加進該筆記本的 `notebook.yml`（決定側欄的章節與順序）。
 
 ```md
 ---
 title: Dijkstra
-description: Shortest paths from one source when no edge is negative.
-date: 2026-11-01
+description: 求非負權重圖的單源最短路徑
+date: 2026-11-08
 tags: [graph, shortest-path]
+pre: [set, priority-queue]
 difficulty: 4
 ---
 ```
 
-The note's URL is the notebook plus its path: `notebooks/cp/graph/dijkstra.md` → `blog.jimmywu.app/cp/graph/dijkstra`.
+新筆記本：建立 `notebooks/<名稱>/notebook.yml`，寫上 `title`、`description`（選填）和 `sections`。
 
-To start a new notebook, create `notebooks/<name>/notebook.yml` with a `title`, an optional `description`, and `sections`. It shows up on the home page.
+## Frontmatter
 
-### Frontmatter
+文章與筆記共用以下欄位。可以寫成清單的欄位，只有一項時也能直接寫單一值。
 
-Posts and notes use the same fields.
+| 欄位          | 必填       | 說明                                                   |
+| ------------- | ---------- | ------------------------------------------------------ |
+| `title`       | 是         | 頁面標題。檔名只決定網址。                             |
+| `date`        | 文章必填   | `YYYY-MM-DD`。                                         |
+| `description` | 否         | 顯示在卡片與連結預覽。                                 |
+| `tags`        | 否         | `[math, dp]`。每個標籤有自己的頁面 `/tags/<標籤>`。    |
+| `pre`         | 否         | 先備知識，`[遞迴, 模運算]`。顯示在內文前的「先備知識」。 |
+| `difficulty`  | 否         | 難度，0（最簡單）到 10 的整數。                        |
+| `author`      | 否         | 共同作者 `[x, y]`。Jimmy Wu 一定列在第一位。           |
+| `draft`       | 否         | `true` 表示草稿，不會出現在網站上。                    |
 
-| Field         | Required       | Notes                                                        |
-| ------------- | -------------- | ------------------------------------------------------------ |
-| `title`       | yes            | Shown on the site. The file name is only the URL.            |
-| `description` | no             | Shown on the card and in link previews. Left empty if missing. |
-| `date`        | posts only     | `YYYY-MM-DD`. Shown on the card and the page.                |
-| `tags`        | no             | A list, or a single word. Each tag gets a page at `/tags/<tag>` listing posts and notes. |
-| `difficulty`  | no             | Whole number from 1 (easiest) to 10.                         |
-| `draft`       | no, posts only | `true` keeps the post off the site.                          |
+每頁都會自動產生連結預覽圖 `/og/<網址>.png`。
 
-Every post and note also gets a link-preview (Open Graph) image at `/og/<its URL>.png`, made at build time. The preview text is its `description`.
+## Markdown
 
-### Markdown
+寫法和 HackMD 相同：
 
-Posts and notes are written the way they were on HackMD:
+- `$x^n$` 行內數學、`$$ ... $$` 區塊數學（KaTeX）。
+- ` ```cpp ` 程式碼，` ```cpp= ` 加行號，` ```cpp=11 ` 從第 11 行開始。
+- 單一換行會保留。
+- 支援表格、待辦清單、刪除線（GFM）。
+- 用相對路徑連到其他頁面：`[快速冪](../math/fast-power.md)`，網站會轉成正確網址。
 
-- `$x^n$` inline math and `$$ ... $$` display math (KaTeX).
-- ` ```cpp ` for a highlighted code block, ` ```cpp= ` to add line numbers, ` ```cpp=11 ` to start numbering at 11.
-- A single line break is kept as a line break.
-- Tables, task lists, and strikethrough (GitHub-flavored Markdown).
-- Link to another post or note by its relative file path: `[快速冪](../math/fast-power.md)`. The site turns this into the right URL, and the same link also works on GitHub and in editors.
+## 建置檢查
 
-### notebook.yml
+以下情況建置會失敗，並說明原因：
 
-`notebooks/<name>/notebook.yml` sets the notebook's title, sections, their order, and the notes in each, including sub-sections.
+- 筆記沒列在 `notebook.yml`（草稿除外）、列了兩次，或列了但檔案不存在。
+- 連到不存在的 `.md`。
+- frontmatter 缺 `title`、文章缺 `date`，或 `difficulty` 不是 0–10 的整數。
+- 文章網址和筆記本或網站頁面衝突。
 
-The build fails with a message that names the problem if:
+GitHub Actions 每次 push 都會跑同樣的建置。
 
-- a note is listed twice, or is listed without a matching file,
-- a post or note links to a `.md` file that doesn't exist,
-- frontmatter is missing `title` (or `date` on a post), or `difficulty` isn't a whole number from 1 to 10,
-- a post's URL collides with a notebook or a site page.
+## 本機執行
 
-GitHub Actions runs the same build on every push, so a mistake shows up as a failed check on the commit.
-
-## Running the site locally
-
-Use Node.js 24.
+需要 Node.js 24。
 
 ```sh
 cd website
 npm ci
-npm run dev      # http://localhost:4321, reloads when posts or notes change
-npm run build    # production build into website/dist
+npm run dev      # http://localhost:4321
+npm run build    # 輸出到 website/dist
 ```
 
-## Deployment
+瀏覽次數使用 Convex，需設定環境變數 `CONVEX_URL`；沒設定時不顯示次數。
 
-Cloudflare Pages is connected to this GitHub repository. Every push to `main` builds and deploys the site. No Cloudflare token is stored in the repository.
+## 部署
 
-Cloudflare build settings:
+Cloudflare Pages 連到這個 repo，每次 push 到 `main` 就會部署。
 
-- Production branch: `main`
-- Root directory: `website`
-- Build command: `npm run build`
-- Build output directory: `dist`
-- Node.js version: `24`, from `website/.nvmrc`
+- Production branch：`main`
+- Root directory：`website`
+- Build command：`npm run build`
+- Output directory：`dist`
+- Node.js：`24`（來自 `website/.nvmrc`）
 
-`blog.jimmywu.app` is set up under the Pages project's **Custom domains** tab. Cloudflare manages its DNS record and HTTPS certificate. The Pages project is still named `cp-note` because Cloudflare can't rename projects.
+Pages 專案名稱仍是 `cp-note`（Cloudflare 無法改名）。
 
-- Custom domain: https://blog.jimmywu.app
-- Cloudflare hostname: https://cp-note-nfn.pages.dev
-- [Cloudflare project](https://dash.cloudflare.com/3573cf391dd2d9dc99966427952b98ee/pages/view/cp-note)
+- 網址：https://blog.jimmywu.app
+- Cloudflare 網址：https://cp-note-nfn.pages.dev
+- [Cloudflare 專案](https://dash.cloudflare.com/3573cf391dd2d9dc99966427952b98ee/pages/view/cp-note)
