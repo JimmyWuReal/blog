@@ -1,9 +1,12 @@
 ---
-// A live view count from Convex: " · 1,234 views", or "1,234 views" with an empty prefix.
+// A view count from Convex: " · 1,234 views", or "1,234 views" with an empty prefix.
 // `count` adds a view of the post or note at `path` (once per browser tab); otherwise the count is
-// only read, as for a notebook's total or a card. The script in layouts/Base.astro fills it in;
-// it stays invisible (but keeps its prefix's space) until then, and isn't rendered at all when
+// only read, as for a notebook's total or a card. The count is in the HTML from the build, so it
+// shows on first paint; the script in layouts/Base.astro updates it in place. If the build
+// couldn't read it, it stays hidden until the script fills it. Not rendered at all when
 // CONVEX_URL isn't set.
+import { formatViews, getViews } from '../lib/views';
+
 interface Props {
   /** A counter from viewPath (cp/math/fast-power, posts/hello) or a notebook slug (cp). */
   path: string;
@@ -14,16 +17,16 @@ interface Props {
 
 const { path, count = false, prefix = ' · ' } = Astro.props;
 const url = import.meta.env.CONVEX_URL;
+// A page that counts a view shows it including the reader's own, so the live count, which
+// includes it, usually matches what's already there.
+const built = await getViews(path);
+const views = built === undefined ? undefined : built + (count ? 1 : 0);
 ---
 
 {
   url && (
-    <span
-      data-views={path}
-      data-count={count ? '' : undefined}
-      class="opacity-0 transition-opacity duration-300 ease-out data-loaded:opacity-100 motion-reduce:transition-none"
-    >
-      {prefix}<span data-views-value />
+    <span data-views={path} data-count={count ? '' : undefined} data-n={views} hidden={views === undefined}>
+      {prefix}<span data-views-value>{views !== undefined && formatViews(views)}</span>
     </span>
   )
 }
