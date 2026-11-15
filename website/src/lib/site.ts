@@ -12,6 +12,14 @@ export const isPost = (entry: Entry): entry is Post => entry.collection === 'pos
 /** Posts and notes both live at their id: /hello, /cp/math/fast-power. */
 export const entryUrl = (entry: Entry) => `/${entry.id}`;
 
+/**
+ * An entry's view counter in Convex. Notes count at their id (cp/math/fast-power); posts at
+ * posts/<id>, since views.hit only takes paths with a slash and also adds the view to the
+ * first part's total: a notebook's for notes, all posts' for posts. No notebook may be named
+ * `posts` (see notebook.ts).
+ */
+export const viewPath = (entry: Entry) => (isPost(entry) ? `posts/${entry.id}` : entry.id);
+
 // URLs that a post can't take, besides notebook slugs.
 const RESERVED = ['index', '404', 'tags', 'og'];
 

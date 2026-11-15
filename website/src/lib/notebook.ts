@@ -35,6 +35,8 @@ async function load(): Promise<Notebook[]> {
 
   const notebooks = Object.entries(ymls).map(([file, yml]): Notebook => {
     const slug = file.split('/').at(-2)!;
+    // posts/ holds the posts' view counters (see viewPath in site.ts).
+    if (slug === 'posts') problems.push('notebooks/posts: "posts" is reserved for post view counts; rename the notebook.');
     const raw = parse(yml) as RawNotebook;
     const order: Note[] = [];
     const sectionPath = new Map<string, string[]>();

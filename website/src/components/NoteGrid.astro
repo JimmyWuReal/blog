@@ -4,7 +4,7 @@
 // dots at the bottom. Cards in a row stretch to the same height, and the space between the two
 // sections takes up the difference. Sub-sections get their own heading and grid.
 import { isSection, type Item } from '../lib/notebook';
-import { entryUrl, formatAuthors, formatDate, formatDay, isPost, type Entry } from '../lib/site';
+import { entryUrl, formatAuthors, formatDate, formatDay, viewPath, type Entry } from '../lib/site';
 import ViewCount from './ViewCount.astro';
 
 interface Props {
@@ -22,8 +22,6 @@ const sections = items.filter(isSection);
       <ul class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
         {notes.map((note) => {
           const { title, description, date, author, tags, difficulty } = note.data;
-          // Only notes are counted (see convex/views.ts), so posts have no views to show.
-          const hasViews = !isPost(note);
           return (
             <li class="relative flex flex-col justify-between gap-4 rounded-2xl bg-[#111] p-5 transition-colors duration-200 ease-out hover:bg-[#161616]">
               <div class="flex flex-col gap-2">
@@ -36,32 +34,28 @@ const sections = items.filter(isSection);
                   {date && <>{' · '}<time datetime={formatDate(date)}>{formatDay(date)}</time></>}
                 </p>
               </div>
-              {(tags.length > 0 || hasViews || difficulty !== undefined) && (
-                <div class="flex flex-col gap-2 font-[DM_Mono,ui-monospace,monospace] text-[11px] leading-[1.6] tabular-nums">
-                  {tags.length > 0 && (
-                    // Relative, so the tag links sit above the card's stretched title link.
-                    <div class="relative flex flex-wrap gap-x-3 gap-y-1">
-                      {tags.map((tag) => (
-                        <a href={`/tags/${encodeURIComponent(tag)}`} class="text-[#9a9a9a] no-underline transition-colors duration-200 ease-out hover:text-white">
-                          #{tag}
-                        </a>
+              <div class="flex flex-col gap-2 font-[DM_Mono,ui-monospace,monospace] text-[11px] leading-[1.6] tabular-nums">
+                {tags.length > 0 && (
+                  // Relative, so the tag links sit above the card's stretched title link.
+                  <div class="relative flex flex-wrap gap-x-3 gap-y-1">
+                    {tags.map((tag) => (
+                      <a href={`/tags/${encodeURIComponent(tag)}`} class="text-[#9a9a9a] no-underline transition-colors duration-200 ease-out hover:text-white">
+                        #{tag}
+                      </a>
+                    ))}
+                  </div>
+                )}
+                <div class="flex items-center justify-between gap-3 text-[#8a8a8a]">
+                  <span><ViewCount path={viewPath(note)} prefix="" /></span>
+                  {difficulty !== undefined && (
+                    <span class="flex gap-[3px]" role="img" aria-label={`Difficulty ${difficulty} of 10`} title={`Difficulty ${difficulty}/10`}>
+                      {Array.from({ length: 10 }, (_, i) => (
+                        <span class={`size-[5px] rounded-full ${i < difficulty ? 'bg-[#e6e6e6]' : 'bg-[#2a2a2a]'}`} />
                       ))}
-                    </div>
-                  )}
-                  {(hasViews || difficulty !== undefined) && (
-                    <div class="flex items-center justify-between gap-3 text-[#8a8a8a]">
-                      <span>{hasViews && <ViewCount path={note.id} prefix="" />}</span>
-                      {difficulty !== undefined && (
-                        <span class="flex gap-[3px]" role="img" aria-label={`Difficulty ${difficulty} of 10`} title={`Difficulty ${difficulty}/10`}>
-                          {Array.from({ length: 10 }, (_, i) => (
-                            <span class={`size-[5px] rounded-full ${i < difficulty ? 'bg-[#e6e6e6]' : 'bg-[#2a2a2a]'}`} />
-                          ))}
-                        </span>
-                      )}
-                    </div>
+                    </span>
                   )}
                 </div>
-              )}
+              </div>
             </li>
           );
         })}
