@@ -188,13 +188,13 @@ const tocBase = Math.min(...toc.map((h) => h.depth));
     clearTimeout(unlockTimer);
     unlockTimer = window.setTimeout(() => (locked = false), 150);
   };
-  // Scrolling yourself mid-jump cancels the browser's smooth scroll, so hand straight back to the spy
-  // rather than leaving the clicked section stuck as active wherever you end up.
-  const interrupt = () => {
+  // The jump can't be interrupted: while it runs, the wheel, touch drags, and scroll keys do nothing.
+  // You can scroll again as soon as it lands.
+  const scrollKeys = new Set([' ', 'PageUp', 'PageDown', 'Home', 'End', 'ArrowUp', 'ArrowDown']);
+  const holdScroll = (event: Event) => {
     if (!locked) return;
-    locked = false;
-    clearTimeout(unlockTimer);
-    frame ||= requestAnimationFrame(spy);
+    if (event instanceof KeyboardEvent && (!scrollKeys.has(event.key) || (event.target as HTMLElement).closest('input, textarea, [contenteditable]'))) return;
+    event.preventDefault();
   };
 
   const place = () => {
@@ -243,7 +243,7 @@ const tocBase = Math.min(...toc.map((h) => h.depth));
 
   if (links.length) {
     addEventListener('scroll', () => (locked ? unlockWhenStill() : (frame ||= requestAnimationFrame(spy))), { passive: true });
-    for (const type of ['wheel', 'touchstart', 'keydown', 'pointerdown']) addEventListener(type, interrupt, { passive: true });
+    for (const type of ['wheel', 'touchmove', 'keydown']) addEventListener(type, holdScroll, { passive: false });
     // Fonts and the xl breakpoint can move the ticks, so re-measure without changing the section
     addEventListener('resize', place);
     document.fonts?.ready.then(place);
