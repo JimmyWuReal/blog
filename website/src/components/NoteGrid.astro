@@ -1,9 +1,11 @@
 ---
-// Cards for posts and notes with their description, date, authors, tags, and difficulty, for the
-// home, notebook contents, and tag pages. Sub-sections get their own heading and grid.
+// Cards for posts and notes, for the home, notebook contents, and tag pages. Each card has two
+// sections: title, description, and "by authors · date" on top; #tags, views, and difficulty
+// dots at the bottom. Cards in a row stretch to the same height, and the space between the two
+// sections takes up the difference. Sub-sections get their own heading and grid.
 import { isSection, type Item } from '../lib/notebook';
-import { entryUrl, type Entry } from '../lib/site';
-import NoteMeta from './NoteMeta.astro';
+import { entryUrl, formatAuthors, formatDate, formatDay, isPost, type Entry } from '../lib/site';
+import ViewCount from './ViewCount.astro';
 
 interface Props {
   items: (Item | Entry)[];
@@ -18,17 +20,51 @@ const sections = items.filter(isSection);
   {
     notes.length > 0 && (
       <ul class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
-        {notes.map((note) => (
-          <li class="relative flex flex-col gap-2 rounded-2xl bg-[#111] p-5 transition-colors duration-200 ease-out hover:bg-[#161616]">
-            <a href={entryUrl(note)} class="text-[15px] font-medium tracking-[-0.01em] text-[#efefef] no-underline after:absolute after:inset-0 after:rounded-2xl">
-              {note.data.title}
-            </a>
-            {note.data.description && <p class="m-0 line-clamp-2 text-[12.5px] leading-[1.7] text-[#7d7d7d]">{note.data.description}</p>}
-            <div class="mt-auto pt-3">
-              <NoteMeta entry={note} />
-            </div>
-          </li>
-        ))}
+        {notes.map((note) => {
+          const { title, description, date, author, tags, difficulty } = note.data;
+          // Only notes are counted (see convex/views.ts), so posts have no views to show.
+          const hasViews = !isPost(note);
+          return (
+            <li class="relative flex flex-col justify-between gap-4 rounded-2xl bg-[#111] p-5 transition-colors duration-200 ease-out hover:bg-[#161616]">
+              <div class="flex flex-col gap-2">
+                <a href={entryUrl(note)} class="text-[15px] font-medium tracking-[-0.01em] text-[#efefef] no-underline after:absolute after:inset-0 after:rounded-2xl">
+                  {title}
+                </a>
+                {description && <p class="m-0 line-clamp-2 text-[12.5px] leading-[1.7] text-[#8c8c8c]">{description}</p>}
+                <p class="m-0 text-[12px] leading-[1.6] text-[#848484] [overflow-wrap:anywhere]">
+                  by {formatAuthors(author)}
+                  {date && <>{' · '}<time datetime={formatDate(date)}>{formatDay(date)}</time></>}
+                </p>
+              </div>
+              {(tags.length > 0 || hasViews || difficulty !== undefined) && (
+                <div class="flex flex-col gap-2 font-[DM_Mono,ui-monospace,monospace] text-[11px] leading-[1.6] tabular-nums">
+                  {tags.length > 0 && (
+                    // Relative, so the tag links sit above the card's stretched title link.
+                    <div class="relative flex flex-wrap gap-x-3 gap-y-1">
+                      {tags.map((tag) => (
+                        <a href={`/tags/${encodeURIComponent(tag)}`} class="text-[#9a9a9a] no-underline transition-colors duration-200 ease-out hover:text-white">
+                          #{tag}
+                        </a>
+                      ))}
+                    </div>
+                  )}
+                  {(hasViews || difficulty !== undefined) && (
+                    <div class="flex items-center justify-between gap-3 text-[#8a8a8a]">
+                      <span>{hasViews && <ViewCount path={note.id} prefix="" />}</span>
+                      {difficulty !== undefined && (
+                        <span class="flex gap-[3px]" role="img" aria-label={`Difficulty ${difficulty} of 10`} title={`Difficulty ${difficulty}/10`}>
+                          {Array.from({ length: 10 }, (_, i) => (
+                            <span class={`size-[5px] rounded-full ${i < difficulty ? 'bg-[#e6e6e6]' : 'bg-[#2a2a2a]'}`} />
+                          ))}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+            </li>
+          );
+        })}
       </ul>
     )
   }
