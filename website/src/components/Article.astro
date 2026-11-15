@@ -3,7 +3,8 @@
 // links, and "On this page". Code blocks get a copy button.
 import { render } from 'astro:content';
 import NoteMeta from './NoteMeta.astro';
-import { entryUrl, formatAuthors, formatDate, type Entry } from '../lib/site';
+import ViewCount from './ViewCount.astro';
+import { entryUrl, formatAuthors, formatDate, isPost, type Entry } from '../lib/site';
 import '../styles/note.css';
 
 interface Props {
@@ -27,6 +28,7 @@ const tocBase = Math.min(...toc.map((h) => h.depth));
         <><time datetime={formatDate(entry.data.date)}>{formatDate(entry.data.date)}</time>{' · '}</>
       )}
       written by {formatAuthors(entry.data.author)}
+      {!isPost(entry) && <ViewCount path={entry.id} count />}
     </p>
     <div class="mt-4 empty:hidden"><NoteMeta entry={entry} /></div>
 
