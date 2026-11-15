@@ -44,9 +44,8 @@ const tocBase = Math.min(...toc.map((h) => h.depth));
     toc.length > 0 && (
       <aside class="toc-scroller sticky top-[84px] z-10 -mx-4 -mt-3 hidden max-h-[calc(100vh-7rem)] self-start overflow-y-auto px-4 py-3 xl:col-start-1 xl:row-start-1 xl:block">
         <!-- "On this page" as quiet ticks: longer = higher level. Hovering (or tabbing into) the
-             ticks opens a panel with the titles; one white marker glides to the section being read.
-             The panel stays inside the TOC column and its gap, never over the note; the aside's
-             padding gives it room so the scroller doesn't clip its edges. -->
+             ticks reveals the titles beside them; one white marker glides to the section being read.
+             The aside's padding keeps the scroller from clipping focus rings. -->
         <nav aria-label="On this page" class="toc" data-toc>
           <ul>
             {toc.map((h) => (
@@ -69,10 +68,10 @@ const tocBase = Math.min(...toc.map((h) => h.depth));
   .toc-scroller { scrollbar-width: none; }
   .toc-scroller::-webkit-scrollbar { display: none; }
 
-  .toc { position: relative; isolation: isolate; }
+  .toc { position: relative; }
   .toc ul { margin: 0; padding: 0; list-style: none; }
 
-  /* Fixed 24px rows keep the ticks evenly spaced; titles are laid over the note, not in the row */
+  /* Fixed 24px rows keep the ticks evenly spaced; titles sit beside the tick, out of the row's flow */
   .toc-link { position: relative; display: flow-root; height: 24px; text-decoration: none; }
 
   /* 20px / 14px / 8px for each level down */
@@ -108,38 +107,12 @@ const tocBase = Math.min(...toc.map((h) => h.depth));
   .toc-link:hover .toc-label,
   .toc-link.is-active .toc-label { color: #fff; }
 
-  /* The panel behind the ticks and titles, raised off the page like the kit's menus */
-  .toc::before {
-    content: '';
-    position: absolute;
-    z-index: -1;
-    top: -10px;
-    bottom: -10px;
-    left: -14px;
-    right: -14px;
-    border-radius: 12px;
-    background: #141414;
-    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07);
-    transform-origin: 0 0;
-    visibility: hidden;
-    opacity: 0;
-    transform: translateX(-4px) scale(0.98);
-    transition: opacity 160ms ease-out, transform 240ms cubic-bezier(0.22, 1, 0.36, 1), visibility 0s 240ms;
-  }
-
-  /* Open: the panel settles first, then the titles follow, as the kit's accordion does. A short
-     delay keeps a pointer passing over the ticks from flashing it. Closing has no delay. */
-  .toc:is(:hover, :has(:focus-visible))::before {
-    visibility: visible;
-    opacity: 1;
-    transform: none;
-    transition-delay: 60ms, 60ms, 0s;
-  }
+  /* A short delay keeps a pointer passing over the ticks from flashing the titles. Hiding has none. */
   .toc:is(:hover, :has(:focus-visible)) .toc-label {
     visibility: visible;
     opacity: 1;
     transform: none;
-    transition-delay: 0s, 120ms, 120ms, 0s;
+    transition-delay: 0s, 60ms, 60ms, 0s;
   }
 
   /* One marker moves between ticks rather than each tick lighting up. It mounts in place (no
