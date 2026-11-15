@@ -17,10 +17,9 @@ const toc = headings.filter((h) => h.depth >= 1 && h.depth <= 3);
 const tocBase = Math.min(...toc.map((h) => h.depth));
 ---
 
-<!-- The same 1120px column as the home page, so the nav bar and content line up across pages.
-     On wide screens "On this page" takes the left edge and the article the right; narrower, the
-     article sits alone on the left. -->
-<div class="mx-auto grid max-w-[1120px] grid-cols-[minmax(0,740px)] px-4 pt-6 pb-10 sm:px-10 lg:pt-12 lg:pb-16 xl:grid-cols-[200px_minmax(0,740px)] xl:justify-between">
+<!-- The same 1120px column as the home page, with the article centered in it. On wide screens
+     "On this page" fills the space to its left, starting at the nav bar's left edge. -->
+<div class="mx-auto grid max-w-[1120px] grid-cols-[minmax(0,740px)] justify-center gap-x-8 px-4 pt-6 pb-10 sm:px-10 lg:pt-12 lg:pb-16 xl:grid-cols-[minmax(0,1fr)_minmax(0,740px)_minmax(0,1fr)]">
   <main class="min-w-0 xl:col-start-2 xl:row-start-1">
     <h1 class="m-0 text-[32px] leading-[1.2] font-medium tracking-[-0.035em] sm:text-[36px]">{entry.data.title}</h1>
     <div class="mt-4"><NoteMeta entry={entry} /></div>
