@@ -23,6 +23,7 @@ const fullTitle = title ? `${title} · ${context}` : SITE_TITLE;
 // public URL drops the extension, and the home page is /.
 const url = new URL(Astro.url.pathname.replace(/(?:\/index)?\.html$/, '') || '/', Astro.site);
 const imageUrl = new URL(image, Astro.site);
+const convexUrl = import.meta.env.CONVEX_URL;
 ---
 
 <!doctype html>
@@ -47,9 +48,56 @@ const imageUrl = new URL(image, Astro.site);
     <meta property="og:image:height" content="630" />
     <meta property="og:image:alt" content={fullTitle} />
     <meta name="twitter:card" content="summary_large_image" />
+    {/* Opens the connection for the view counts while the page is still loading. */}
+    {convexUrl && <link rel="preconnect" href={convexUrl} crossorigin />}
   </head>
   <body data-page-title={title ?? SITE_TITLE} data-page-kind={kind}>
     <slot />
+    {
+      convexUrl && (
+        <script is:inline define:vars={{ convexUrl }}>
+          // Fills every ViewCount on the page. It's inline at the end of the body and calls
+          // Convex's HTTP API with plain fetch (no Convex client to download), so the requests
+          // start as soon as the page is parsed.
+          for (const el of document.querySelectorAll('[data-views]')) {
+            const path = el.dataset.views;
+            const show = (n) => {
+              el.querySelector('[data-views-value]').textContent = `${n.toLocaleString('en-US')} ${n === 1 ? 'view' : 'views'}`;
+              el.dataset.loaded = '';
+            };
+            // Show the last count this browser saw right away; the live count replaces it.
+            try {
+              const last = localStorage.getItem(`views:${path}`);
+              if (last !== null) show(Number(last));
+            } catch {}
+            // A reload in the same tab reads the count instead of adding another view.
+            let seen = true;
+            if (el.dataset.count !== undefined) {
+              try {
+                seen = sessionStorage.getItem(`viewed:${path}`) !== null;
+                sessionStorage.setItem(`viewed:${path}`, '');
+              } catch {
+                seen = false;
+              }
+            }
+            fetch(`${convexUrl}/api/${seen ? 'query' : 'mutation'}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ path: seen ? 'views:get' : 'views:hit', args: { path }, format: 'json' }),
+            })
+              .then((res) => res.json())
+              .then((res) => {
+                if (res.status !== 'success') return;
+                show(res.value);
+                try {
+                  localStorage.setItem(`views:${path}`, String(res.value));
+                } catch {}
+              })
+              .catch(() => {});
+          }
+        </script>
+      )
+    }
   </body>
 </html>
 
