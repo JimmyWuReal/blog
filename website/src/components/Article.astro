@@ -188,6 +188,14 @@ const tocBase = Math.min(...toc.map((h) => h.depth));
     clearTimeout(unlockTimer);
     unlockTimer = window.setTimeout(() => (locked = false), 150);
   };
+  // Scrolling yourself mid-jump cancels the browser's smooth scroll, so hand straight back to the spy
+  // rather than leaving the clicked section stuck as active wherever you end up.
+  const interrupt = () => {
+    if (!locked) return;
+    locked = false;
+    clearTimeout(unlockTimer);
+    frame ||= requestAnimationFrame(spy);
+  };
 
   const place = () => {
     const tick = links[current]?.querySelector<HTMLElement>('.toc-tick');
@@ -235,6 +243,7 @@ const tocBase = Math.min(...toc.map((h) => h.depth));
 
   if (links.length) {
     addEventListener('scroll', () => (locked ? unlockWhenStill() : (frame ||= requestAnimationFrame(spy))), { passive: true });
+    for (const type of ['wheel', 'touchstart', 'keydown', 'pointerdown']) addEventListener(type, interrupt, { passive: true });
     // Fonts and the xl breakpoint can move the ticks, so re-measure without changing the section
     addEventListener('resize', place);
     document.fonts?.ready.then(place);
