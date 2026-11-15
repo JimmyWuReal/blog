@@ -43,17 +43,20 @@ const tocBase = Math.min(...toc.map((h) => h.depth));
   {
     toc.length > 0 && (
       <aside class="sticky top-24 hidden max-h-[calc(100vh-8rem)] self-start overflow-y-auto xl:col-start-1 xl:row-start-1 xl:block">
-        <nav aria-label="On this page" data-toc>
-          <p class="mb-3 text-[12px] font-medium text-[#6f6f6f]">On this page</p>
-          <ul class="flex flex-col gap-2">
+        <!-- "On this page" as quiet ticks: longer = higher level. Hovering (or tabbing into) the nav
+             reveals the titles; one white marker glides to the section being read. -->
+        <nav aria-label="On this page" class="toc" data-toc>
+          <ul>
             {toc.map((h) => (
-              <li style={{ paddingLeft: `${(h.depth - tocBase) * 12}px` }}>
-                <a href={`#${h.slug}`} class="toc-link block text-[12.5px] leading-[1.45] text-[#7d7d7d] no-underline hover:text-white">
-                  {h.text}
+              <li style={`--level:${h.depth - tocBase}`}>
+                <a href={`#${h.slug}`} class="toc-link">
+                  <span class="toc-tick" aria-hidden="true" />
+                  <span class="toc-label">{h.text}</span>
                 </a>
               </li>
             ))}
           </ul>
+          <span class="toc-marker" aria-hidden="true" />
         </nav>
       </aside>
     )
@@ -61,7 +64,57 @@ const tocBase = Math.min(...toc.map((h) => h.depth));
 </div>
 
 <style>
-  .toc-link.is-active { color: #fff; }
+  .toc { position: relative; padding-top: 6px; }
+  .toc ul { margin: 0; padding: 0; list-style: none; }
+
+  /* The link spans the column so the pointer can travel from tick to title without losing hover */
+  .toc-link { display: flex; align-items: flex-start; gap: 12px; padding: 3px 0; text-decoration: none; }
+
+  /* 20px / 14px / 8px for each level down; the label column stays fixed so titles line up */
+  .toc-tick {
+    flex: none;
+    width: calc(20px - var(--level) * 6px);
+    height: 2px;
+    margin: 8px calc(var(--level) * 6px) 0 0;
+    border-radius: 2px;
+    background: #343434;
+    transition: background-color 200ms ease;
+  }
+  .toc-label {
+    padding-left: calc(var(--level) * 8px);
+    font-size: 12.5px;
+    line-height: 1.45;
+    color: #8c8c8c;
+    overflow-wrap: anywhere;
+    transition: color 200ms ease, opacity 160ms ease-out, transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+  }
+  .toc-link:hover .toc-label,
+  .toc-link.is-active .toc-label { color: #fff; }
+  .toc-link:hover .toc-tick { background: #8c8c8c; }
+
+  /* Titles stay in the layout while hidden, so the ticks never shift when they appear */
+  @media (hover: hover) {
+    .toc-label { opacity: 0; transform: translateX(-4px); }
+    .toc:hover .toc-label,
+    .toc:has(:focus-visible) .toc-label { opacity: 1; transform: none; }
+    .toc:hover .toc-tick { background: #4a4a4a; }
+    .toc .toc-link:hover .toc-tick { background: #8c8c8c; }
+  }
+
+  /* One marker moves between ticks rather than each tick lighting up. It mounts in place (no
+     transition) and only starts gliding once it has been placed. */
+  .toc-marker {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 2px;
+    border-radius: 2px;
+    background: #fff;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .toc-marker.is-placed { opacity: 1; }
+  .toc-marker.is-ready { transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1), width 320ms cubic-bezier(0.22, 1, 0.36, 1); }
 </style>
 
 <script>
@@ -101,18 +154,38 @@ const tocBase = Math.min(...toc.map((h) => h.depth));
     });
   }
 
-  // Highlight the section being read in "On this page"
+  // Highlight the section being read in "On this page" and glide the marker to its tick
+  const toc = document.querySelector<HTMLElement>('[data-toc]');
   const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-toc] .toc-link')];
   const targets = links.map((link) => document.getElementById(decodeURIComponent(link.hash.slice(1))));
+  const marker = toc?.querySelector<HTMLElement>('.toc-marker');
   let frame = 0;
+  let current = -1;
+  const place = () => {
+    const tick = links[current]?.querySelector<HTMLElement>('.toc-tick');
+    if (!toc || !marker || !tick || !tick.offsetWidth) return; // hidden below xl
+    const y = tick.getBoundingClientRect().top - toc.getBoundingClientRect().top;
+    marker.style.transform = `translateY(${y}px)`;
+    marker.style.width = `${tick.offsetWidth}px`;
+    if (!marker.classList.contains('is-placed')) {
+      marker.classList.add('is-placed');
+      requestAnimationFrame(() => requestAnimationFrame(() => marker.classList.add('is-ready')));
+    }
+  };
   const spy = () => {
     frame = 0;
-    let current = 0;
-    targets.forEach((el, i) => el && el.getBoundingClientRect().top < 120 && (current = i));
+    let next = 0;
+    targets.forEach((el, i) => el && el.getBoundingClientRect().top < 120 && (next = i));
+    if (next === current) return;
+    current = next;
     links.forEach((link, i) => link.classList.toggle('is-active', i === current));
+    place();
   };
   if (links.length) {
     addEventListener('scroll', () => (frame ||= requestAnimationFrame(spy)), { passive: true });
+    // Fonts and the xl breakpoint can move the ticks, so re-measure without changing the section
+    addEventListener('resize', place);
+    document.fonts?.ready.then(place);
     spy();
   }
 </script>
