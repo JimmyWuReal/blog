@@ -19,6 +19,7 @@
     "@resvg/resvg-js": "^2.6.2",
     "@tailwindcss/vite": "^4.3.3",
     "astro": "^7.4.4",
+    "convex": "^1.50.0",
     "katex": "^0.19.1",
     "rehype-katex": "^7.0.1",
     "remark-breaks": "^4.0.0",
