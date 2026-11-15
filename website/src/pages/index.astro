@@ -1,5 +1,5 @@
 ---
-// Home: every notebook, then every blog post, newest first.
+// Home: every blog post (newest first) right under the header, then every notebook.
 import Listing from '../layouts/Listing.astro';
 import NoteGrid from '../components/NoteGrid.astro';
 import { getNotebooks } from '../lib/notebook';
@@ -12,6 +12,8 @@ const posts = await getPosts();
 <Listing>
   <h1 class="sr-only">{SITE_TITLE}</h1>
   <div class="flex flex-col gap-14">
+    {posts.length > 0 && <NoteGrid items={posts} />}
+
     <section class="flex flex-col gap-5">
       <h2 class="m-0 text-[24px] leading-[1.3] font-medium tracking-[-0.035em]">Notebooks</h2>
       <ul class="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5 lg:grid-cols-3">
@@ -22,20 +24,11 @@ const posts = await getPosts();
                 {notebook.title}
               </a>
               {notebook.description && <p class="m-0 line-clamp-2 text-[12.5px] leading-[1.7] text-[#7d7d7d]">{notebook.description}</p>}
-              <span class="mono-value mt-auto pt-2 text-[#6f6f6f]">{plural(notebook.order.length, 'note')}</span>
+              <span class="mt-auto pt-3 font-[DM_Mono,ui-monospace,monospace] text-[12px] text-[#8a8a8a] tabular-nums">{plural(notebook.order.length, 'note')}</span>
             </li>
           ))
         }
       </ul>
     </section>
-
-    {
-      posts.length > 0 && (
-        <section class="flex flex-col gap-5">
-          <h2 class="m-0 text-[24px] leading-[1.3] font-medium tracking-[-0.035em]">Posts</h2>
-          <NoteGrid items={posts} />
-        </section>
-      )
-    }
   </div>
 </Listing>

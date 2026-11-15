@@ -1,9 +1,10 @@
-// View counters for notebook notes. Opening a note counts one view for it and one for
-// its notebook, so the notebook's total is a single read.
+// View counters for notes and posts. Opening a note counts one view for it and one for
+// its notebook, so the notebook's total is a single read. Posts count at posts/<id> (see
+// viewPath in src/lib/site.ts), which adds to an all-posts total at `posts` the same way.
 import { mutation, query, type MutationCtx } from './_generated/server';
 import { v } from 'convex/values';
 
-// Note ids look like cp/math/fast-power; anything else is not a note.
+// Note ids look like cp/math/fast-power, post counters like posts/hello; anything else is refused.
 const NOTE_PATH = /^[\w-]+(?:\/[\w-]+)+$/;
 
 async function bump(ctx: MutationCtx, path: string) {

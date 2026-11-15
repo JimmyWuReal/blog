@@ -12,6 +12,14 @@ export const isPost = (entry: Entry): entry is Post => entry.collection === 'pos
 /** Posts and notes both live at their id: /hello, /cp/math/fast-power. */
 export const entryUrl = (entry: Entry) => `/${entry.id}`;
 
+/**
+ * An entry's view counter in Convex. Notes count at their id (cp/math/fast-power); posts at
+ * posts/<id>, since views.hit only takes paths with a slash and also adds the view to the
+ * first part's total: a notebook's for notes, all posts' for posts. No notebook may be named
+ * `posts` (see notebook.ts).
+ */
+export const viewPath = (entry: Entry) => (isPost(entry) ? `posts/${entry.id}` : entry.id);
+
 // URLs that a post can't take, besides notebook slugs.
 const RESERVED = ['index', '404', 'tags', 'og'];
 
@@ -45,6 +53,10 @@ export async function getTags() {
 
 /** A frontmatter date as YYYY-MM-DD. YAML dates are midnight UTC, so format in UTC. */
 export const formatDate = (date: Date) => date.toISOString().slice(0, 10);
+
+/** A frontmatter date as "Nov 8, 2026", for cards. In UTC like formatDate. */
+export const formatDay = (date: Date) =>
+  date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric', timeZone: 'UTC' });
 
 /** Jimmy Wu, followed by any additional authors from the frontmatter. */
 export function formatAuthors(author: string[]) {

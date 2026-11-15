@@ -1,5 +1,5 @@
 // Reads every notebooks/<slug>/notebook.yml and pairs it with that folder's notes, so
-// pages can render the sidebar, the contents page, and previous / next links.
+// pages can render the sidebar and the contents page.
 import { getCollection, type CollectionEntry } from 'astro:content';
 import { parse } from 'yaml';
 
@@ -35,6 +35,8 @@ async function load(): Promise<Notebook[]> {
 
   const notebooks = Object.entries(ymls).map(([file, yml]): Notebook => {
     const slug = file.split('/').at(-2)!;
+    // posts/ holds the posts' view counters (see viewPath in site.ts).
+    if (slug === 'posts') problems.push('notebooks/posts: "posts" is reserved for post view counts; rename the notebook.');
     const raw = parse(yml) as RawNotebook;
     const order: Note[] = [];
     const sectionPath = new Map<string, string[]>();

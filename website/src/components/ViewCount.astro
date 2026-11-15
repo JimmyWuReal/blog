@@ -1,21 +1,24 @@
 ---
-// A live view count from Convex: " · 1,234 views". `count` adds a view of the note at
-// `path` (once per browser tab); otherwise the count is only read, as for a notebook's
-// total. Stays hidden until the count loads, and entirely when CONVEX_URL isn't set.
+// A live view count from Convex: " · 1,234 views", or "1,234 views" with an empty prefix.
+// `count` adds a view of the post or note at `path` (once per browser tab); otherwise the count is
+// only read, as for a notebook's total or a card. Stays hidden until the count loads, and
+// entirely when CONVEX_URL isn't set.
 interface Props {
-  /** A note id (cp/math/fast-power) or a notebook slug (cp). */
+  /** A counter from viewPath (cp/math/fast-power, posts/hello) or a notebook slug (cp). */
   path: string;
   count?: boolean;
+  /** Text before the count; cards pass '' to show it on its own. */
+  prefix?: string;
 }
 
-const { path, count = false } = Astro.props;
+const { path, count = false, prefix = ' · ' } = Astro.props;
 const url = import.meta.env.CONVEX_URL;
 ---
 
 {
   url && (
     <span hidden data-views={path} data-count={count ? '' : undefined} data-convex-url={url}>
-      {' · '}<span data-views-value />
+      {prefix}<span data-views-value />
     </span>
   )
 }

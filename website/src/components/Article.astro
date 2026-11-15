@@ -1,36 +1,31 @@
 ---
-// The reading view of a post or note: title, meta, rendered markdown, previous / next
-// links, and "On this page". Code blocks get a copy button.
+// The reading view of a post or note: title, meta, rendered markdown, and "On this page".
+// Code blocks get a copy button. The page puts SiteHeader above it.
 import { render } from 'astro:content';
 import NoteMeta from './NoteMeta.astro';
 import ViewCount from './ViewCount.astro';
-import { entryUrl, formatAuthors, formatDate, isPost, type Entry } from '../lib/site';
+import { viewPath, type Entry } from '../lib/site';
 import '../styles/note.css';
 
 interface Props {
   entry: Entry;
-  prev?: Entry;
-  next?: Entry;
 }
 
-const { entry, prev, next } = Astro.props;
+const { entry } = Astro.props;
 const { Content, headings } = await render(entry);
 const toc = headings.filter((h) => h.depth >= 1 && h.depth <= 3);
 // Indent each level relative to the shallowest heading, so a post without an H1 isn't shifted right
 const tocBase = Math.min(...toc.map((h) => h.depth));
 ---
 
-<div class="flex justify-center gap-14 px-4 py-10 sm:px-10 lg:py-16">
-  <main class="w-full max-w-[740px] min-w-0">
+<!-- The same 1120px column as the home page, with the article centered in it. On wide screens
+     "On this page" sits as ticks just left of the article. -->
+<div class="mx-auto grid max-w-[1120px] grid-cols-[minmax(0,740px)] justify-center gap-x-8 px-4 pt-6 pb-10 sm:px-10 lg:pt-12 lg:pb-16 xl:grid-cols-[minmax(0,1fr)_minmax(0,740px)_minmax(0,1fr)]">
+  <main class="min-w-0 xl:col-start-2 xl:row-start-1">
     <h1 class="m-0 text-[32px] leading-[1.2] font-medium tracking-[-0.035em] sm:text-[36px]">{entry.data.title}</h1>
-    <p class="mt-3 font-[DM_Mono,ui-monospace,monospace] text-[12px] text-[#8a8a8a] tabular-nums [overflow-wrap:anywhere]">
-      {entry.data.date && (
-        <><time datetime={formatDate(entry.data.date)}>{formatDate(entry.data.date)}</time>{' · '}</>
-      )}
-      written by {formatAuthors(entry.data.author)}
-      {!isPost(entry) && <ViewCount path={entry.id} count />}
-    </p>
-    <div class="mt-4 empty:hidden"><NoteMeta entry={entry} /></div>
+    <div class="mt-4">
+      <NoteMeta entry={entry}><ViewCount path={viewPath(entry)} count /></NoteMeta>
+    </div>
 
     {
       entry.data.pre.length > 0 && (
@@ -46,41 +41,26 @@ const tocBase = Math.min(...toc.map((h) => h.depth));
     <article class="note mt-10">
       <Content />
     </article>
-
-    {
-      (prev || next) && (
-        <nav aria-label="Previous and next" class="mt-20 flex justify-between gap-6">
-          {prev ? (
-            <a href={entryUrl(prev)} class="group flex flex-col gap-1 no-underline">
-              <span class="text-[12px] text-[#6f6f6f]">Previous</span>
-              <span class="text-[14px] font-medium text-[#cfcfcf] group-hover:text-white">{prev.data.title}</span>
-            </a>
-          ) : <span />}
-          {next && (
-            <a href={entryUrl(next)} class="group flex flex-col items-end gap-1 text-right no-underline">
-              <span class="text-[12px] text-[#6f6f6f]">Next</span>
-              <span class="text-[14px] font-medium text-[#cfcfcf] group-hover:text-white">{next.data.title}</span>
-            </a>
-          )}
-        </nav>
-      )
-    }
   </main>
 
   {
     toc.length > 0 && (
-      <aside class="sticky top-16 hidden max-h-[calc(100vh-8rem)] w-[200px] shrink-0 self-start overflow-y-auto xl:block">
-        <nav aria-label="On this page" data-toc>
-          <p class="mb-3 text-[12px] font-medium text-[#6f6f6f]">On this page</p>
-          <ul class="flex flex-col gap-2">
+      <aside class="toc-scroller sticky top-[84px] z-10 -mx-4 -mt-3 hidden max-h-[calc(100vh-7rem)] self-start overflow-y-auto px-4 py-3 xl:col-start-1 xl:row-start-1 xl:block">
+        <!-- "On this page" as quiet ticks: longer = higher level. Hovering (or tabbing into) the
+             ticks reveals the titles beside them; one white marker glides to the section being read.
+             The aside's padding keeps the scroller from clipping focus rings. -->
+        <nav aria-label="On this page" class="toc" data-toc>
+          <ul>
             {toc.map((h) => (
-              <li style={{ paddingLeft: `${(h.depth - tocBase) * 12}px` }}>
-                <a href={`#${h.slug}`} class="toc-link block text-[12.5px] leading-[1.45] text-[#7d7d7d] no-underline hover:text-white">
-                  {h.text}
+              <li style={`--level:${h.depth - tocBase}`}>
+                <a href={`#${h.slug}`} class="toc-link" title={h.text}>
+                  <span class="toc-tick" aria-hidden="true" />
+                  <span class="toc-label">{h.text}</span>
                 </a>
               </li>
             ))}
           </ul>
+          <span class="toc-marker" aria-hidden="true" />
         </nav>
       </aside>
     )
@@ -88,7 +68,70 @@ const tocBase = Math.min(...toc.map((h) => h.depth));
 </div>
 
 <style>
-  .toc-link.is-active { color: #fff; }
+  .toc-scroller { scrollbar-width: none; }
+  .toc-scroller::-webkit-scrollbar { display: none; }
+
+  .toc { position: relative; }
+  .toc ul { margin: 0; padding: 0; list-style: none; }
+
+  /* Fixed 24px rows keep the ticks evenly spaced; titles sit beside the tick, out of the row's flow */
+  .toc-link { position: relative; display: flow-root; height: 24px; text-decoration: none; }
+
+  /* 20px / 14px / 8px for each level down */
+  .toc-tick {
+    display: block;
+    width: calc(20px - var(--level) * 6px);
+    height: 2px;
+    margin-top: 11px;
+    border-radius: 2px;
+    background: #343434;
+    transition: background-color 200ms ease;
+  }
+  .toc:hover .toc-tick { background: #4a4a4a; }
+  .toc .toc-link:hover .toc-tick { background: #8c8c8c; }
+
+  .toc-label {
+    position: absolute;
+    top: 0;
+    left: 32px;
+    right: 0;
+    padding-left: calc(var(--level) * 10px);
+    overflow: hidden;
+    font-size: 12.5px;
+    line-height: 24px;
+    color: #8c8c8c;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: color 200ms ease, opacity 160ms ease-out, transform 200ms cubic-bezier(0.22, 1, 0.36, 1), visibility 0s 200ms;
+  }
+  .toc-link:hover .toc-label,
+  .toc-link.is-active .toc-label { color: #fff; }
+
+  /* A short delay keeps a pointer passing over the ticks from flashing the titles. Hiding has none. */
+  .toc:is(:hover, :has(:focus-visible)) .toc-label {
+    visibility: visible;
+    opacity: 1;
+    transform: none;
+    transition-delay: 0s, 60ms, 60ms, 0s;
+  }
+
+  /* One marker moves between ticks rather than each tick lighting up. It mounts in place (no
+     transition) and only starts gliding once it has been placed. */
+  .toc-marker {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 2px;
+    border-radius: 2px;
+    background: #fff;
+    opacity: 0;
+    pointer-events: none;
+  }
+  .toc-marker.is-placed { opacity: 1; }
+  .toc-marker.is-ready { transition: transform 320ms cubic-bezier(0.22, 1, 0.36, 1), width 320ms cubic-bezier(0.22, 1, 0.36, 1); }
 </style>
 
 <script>
@@ -128,18 +171,92 @@ const tocBase = Math.min(...toc.map((h) => h.depth));
     });
   }
 
-  // Highlight the section being read in "On this page"
+  // "On this page": highlight the section being read, glide the marker to its tick, keep that tick
+  // in view when the list is taller than the screen, and smooth-scroll on click.
+  const toc = document.querySelector<HTMLElement>('[data-toc]');
+  const scroller = toc?.closest<HTMLElement>('.toc-scroller');
+  const marker = toc?.querySelector<HTMLElement>('.toc-marker');
   const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-toc] .toc-link')];
   const targets = links.map((link) => document.getElementById(decodeURIComponent(link.hash.slice(1))));
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
   let frame = 0;
+  let current = -1;
+  // While a click's smooth scroll runs, keep the clicked section active instead of stepping through
+  // every section on the way. Unlock once the page has been still for a moment; this works in every
+  // browser, unlike scrollend. The spy then waits for the next real scroll, so a section near the
+  // page bottom that can't reach the top stays active after its click.
+  let locked = false;
+  let unlockTimer = 0;
+  const unlockWhenStill = () => {
+    clearTimeout(unlockTimer);
+    unlockTimer = window.setTimeout(() => (locked = false), 150);
+  };
+  // The jump can't be interrupted: while it runs, the wheel, touch drags, and scroll keys do nothing.
+  // You can scroll again as soon as it lands.
+  const scrollKeys = new Set([' ', 'PageUp', 'PageDown', 'Home', 'End', 'ArrowUp', 'ArrowDown']);
+  const holdScroll = (event: Event) => {
+    if (!locked) return;
+    if (event instanceof KeyboardEvent && (!scrollKeys.has(event.key) || (event.target as HTMLElement).closest('input, textarea, [contenteditable]'))) return;
+    event.preventDefault();
+  };
+
+  const place = () => {
+    const tick = links[current]?.querySelector<HTMLElement>('.toc-tick');
+    if (!toc || !scroller || !marker || !tick || !tick.offsetWidth) return; // hidden below xl
+    const tickBox = tick.getBoundingClientRect();
+    marker.style.transform = `translateY(${tickBox.top - toc.getBoundingClientRect().top}px)`;
+    marker.style.width = `${tick.offsetWidth}px`;
+    const ready = marker.classList.contains('is-ready');
+    if (!marker.classList.contains('is-placed')) {
+      marker.classList.add('is-placed');
+      requestAnimationFrame(() => requestAnimationFrame(() => marker.classList.add('is-ready')));
+    }
+    // Long lists: keep the current tick near the middle rather than at the edge or out of sight
+    if (scroller.scrollHeight > scroller.clientHeight) {
+      const y = tickBox.top - scroller.getBoundingClientRect().top + scroller.scrollTop;
+      scroller.scrollTo({ top: y - scroller.clientHeight / 2, behavior: ready && !reduceMotion.matches ? 'smooth' : 'instant' });
+    }
+  };
+  const activate = (index: number) => {
+    if (index === current) return;
+    current = index;
+    links.forEach((link, i) => link.classList.toggle('is-active', i === current));
+    place();
+  };
   const spy = () => {
     frame = 0;
-    let current = 0;
-    targets.forEach((el, i) => el && el.getBoundingClientRect().top < 120 && (current = i));
-    links.forEach((link, i) => link.classList.toggle('is-active', i === current));
+    if (locked) return;
+    let next = 0;
+    targets.forEach((el, i) => el && el.getBoundingClientRect().top < 120 && (next = i));
+    activate(next);
   };
+
+  links.forEach((link, i) =>
+    link.addEventListener('click', (event) => {
+      if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+      const target = targets[i];
+      if (!target) return;
+      event.preventDefault();
+      history.pushState(null, '', link.hash);
+      // Keep keyboard navigation at the destination, as with a native fragment link.
+      if (!target.hasAttribute('tabindex')) {
+        target.setAttribute('tabindex', '-1');
+        target.addEventListener('blur', () => target.removeAttribute('tabindex'), { once: true });
+      }
+      target.focus({ preventScroll: true });
+      activate(i);
+      locked = true;
+      unlockWhenStill();
+      target.scrollIntoView({ behavior: reduceMotion.matches ? 'auto' : 'smooth', block: 'start' });
+    }),
+  );
+
   if (links.length) {
-    addEventListener('scroll', () => (frame ||= requestAnimationFrame(spy)), { passive: true });
+    addEventListener('scroll', () => (locked ? unlockWhenStill() : (frame ||= requestAnimationFrame(spy))), { passive: true });
+    for (const type of ['wheel', 'touchmove', 'keydown']) addEventListener(type, holdScroll, { passive: false });
+    // Fonts and the xl breakpoint can move the ticks, so re-measure without changing the section
+    addEventListener('resize', place);
+    document.fonts?.ready.then(place);
     spy();
   }
 </script>

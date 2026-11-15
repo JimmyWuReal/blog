@@ -3,7 +3,7 @@
 .note > :first-child { margin-top: 0; }
 .note :is(p, ul, ol, blockquote, pre, table, .code-block, .katex-display) { margin: 0 0 18px; }
 
-.note :is(h1, h2, h3, h4, h5, h6) { color: #fff; font-weight: 500; scroll-margin-top: 24px; }
+.note :is(h1, h2, h3, h4, h5, h6) { color: #fff; font-weight: 500; scroll-margin-top: 84px; }
 .note h1 { margin: 56px 0 18px; font-size: 30px; line-height: 1.2; letter-spacing: -0.035em; }
 .note h2 { margin: 52px 0 16px; font-size: 24px; line-height: 1.3; letter-spacing: -0.03em; }
 .note h3 { margin: 36px 0 12px; font-size: 18px; line-height: 1.4; letter-spacing: -0.02em; }
@@ -54,3 +54,7 @@
 /* Math */
 .note .katex { font-size: 1.1em; color: #e6e6e6; }
 .note .katex-display { overflow-x: auto; overflow-y: hidden; padding: 4px 0; }
+
+/* Horizontal scrollers inside the note still scroll, without a visible scrollbar */
+.note :is(pre, table, .katex-display) { scrollbar-width: none; }
+.note :is(pre, table, .katex-display)::-webkit-scrollbar { display: none; }

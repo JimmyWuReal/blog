@@ -8,14 +8,18 @@ interface Props {
   description?: string;
   /** Open Graph image path; defaults to the home page's. */
   image?: string;
+  /** Show a back button and this title in the nav bar, as on a notebook's contents page. */
+  back?: { href: string; title: string };
+  /** Lets a note's back link return to this page; see Base. */
+  kind?: 'notebook';
 }
+
+const { back, ...base } = Astro.props;
 ---
 
-<Base {...Astro.props}>
-  <div class="mx-auto max-w-[1120px] px-4 pt-8 pb-24 sm:px-10">
-    <SiteHeader />
-    <main class="mt-16 sm:mt-20">
-      <slot />
-    </main>
-  </div>
+<Base {...base}>
+  <SiteHeader back={back?.href} crumbs={back && [{ title: back.title }]} />
+  <main class="mx-auto max-w-[1120px] px-4 pt-6 pb-24 sm:px-10">
+    <slot />
+  </main>
 </Base>
