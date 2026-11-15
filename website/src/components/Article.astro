@@ -18,7 +18,7 @@ const tocBase = Math.min(...toc.map((h) => h.depth));
 ---
 
 <!-- The same 1120px column as the home page, with the article centered in it. On wide screens
-     "On this page" fills the space to its left, starting at the nav bar's left edge. -->
+     "On this page" sits as ticks just left of the article. -->
 <div class="mx-auto grid max-w-[1120px] grid-cols-[minmax(0,740px)] justify-center gap-x-8 px-4 pt-6 pb-10 sm:px-10 lg:pt-12 lg:pb-16 xl:grid-cols-[minmax(0,1fr)_minmax(0,740px)_minmax(0,1fr)]">
   <main class="min-w-0 xl:col-start-2 xl:row-start-1">
     <h1 class="m-0 text-[32px] leading-[1.2] font-medium tracking-[-0.035em] sm:text-[36px]">{entry.data.title}</h1>
@@ -42,14 +42,16 @@ const tocBase = Math.min(...toc.map((h) => h.depth));
 
   {
     toc.length > 0 && (
-      <aside class="sticky top-24 hidden max-h-[calc(100vh-8rem)] self-start overflow-y-auto xl:col-start-1 xl:row-start-1 xl:block">
-        <!-- "On this page" as quiet ticks: longer = higher level. Hovering (or tabbing into) the nav
-             reveals the titles; one white marker glides to the section being read. -->
-        <nav aria-label="On this page" class="toc" data-toc>
+      <aside class="toc-scroller pointer-events-none sticky top-[84px] z-10 -mt-3 hidden max-h-[calc(100vh-7rem)] self-start overflow-y-auto py-3 xl:col-start-1 xl:col-end-3 xl:row-start-1 xl:grid xl:grid-cols-subgrid">
+        <!-- "On this page" as quiet ticks: longer = higher level. Hovering (or tabbing into) the
+             ticks opens a panel with the titles; one white marker glides to the section being read.
+             The aside spans the TOC column and the article (via subgrid) so that panel can open over
+             the note without being clipped by the scroller. Only the nav takes the pointer. -->
+        <nav aria-label="On this page" class="toc pointer-events-auto justify-self-end" data-toc>
           <ul>
             {toc.map((h) => (
               <li style={`--level:${h.depth - tocBase}`}>
-                <a href={`#${h.slug}`} class="toc-link">
+                <a href={`#${h.slug}`} class="toc-link" title={h.text}>
                   <span class="toc-tick" aria-hidden="true" />
                   <span class="toc-label">{h.text}</span>
                 </a>
@@ -64,41 +66,83 @@ const tocBase = Math.min(...toc.map((h) => h.depth));
 </div>
 
 <style>
-  .toc { position: relative; padding-top: 6px; }
+  .toc-scroller { scrollbar-width: none; }
+  .toc-scroller::-webkit-scrollbar { display: none; }
+
+  .toc { position: relative; isolation: isolate; width: 20px; }
   .toc ul { margin: 0; padding: 0; list-style: none; }
 
-  /* The link spans the column so the pointer can travel from tick to title without losing hover */
-  .toc-link { display: flex; align-items: flex-start; gap: 12px; padding: 3px 0; text-decoration: none; }
+  /* Fixed 24px rows keep the ticks evenly spaced; titles are laid over the note, not in the row */
+  .toc-link { position: relative; display: flow-root; height: 24px; text-decoration: none; }
 
-  /* 20px / 14px / 8px for each level down; the label column stays fixed so titles line up */
+  /* 20px / 14px / 8px for each level down */
   .toc-tick {
-    flex: none;
+    display: block;
     width: calc(20px - var(--level) * 6px);
     height: 2px;
-    margin: 8px calc(var(--level) * 6px) 0 0;
+    margin-top: 11px;
     border-radius: 2px;
     background: #343434;
     transition: background-color 200ms ease;
   }
+  .toc:hover .toc-tick { background: #4a4a4a; }
+  .toc .toc-link:hover .toc-tick { background: #8c8c8c; }
+
   .toc-label {
-    padding-left: calc(var(--level) * 8px);
+    position: absolute;
+    top: 0;
+    left: 32px;
+    width: 220px;
+    padding-left: calc(var(--level) * 10px);
+    overflow: hidden;
     font-size: 12.5px;
-    line-height: 1.45;
+    line-height: 24px;
     color: #8c8c8c;
-    overflow-wrap: anywhere;
-    transition: color 200ms ease, opacity 160ms ease-out, transform 200ms cubic-bezier(0.22, 1, 0.36, 1);
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateX(-4px);
+    transition: color 200ms ease, opacity 160ms ease-out, transform 200ms cubic-bezier(0.22, 1, 0.36, 1), visibility 0s 200ms;
   }
   .toc-link:hover .toc-label,
   .toc-link.is-active .toc-label { color: #fff; }
-  .toc-link:hover .toc-tick { background: #8c8c8c; }
 
-  /* Titles stay in the layout while hidden, so the ticks never shift when they appear */
-  @media (hover: hover) {
-    .toc-label { opacity: 0; transform: translateX(-4px); }
-    .toc:hover .toc-label,
-    .toc:has(:focus-visible) .toc-label { opacity: 1; transform: none; }
-    .toc:hover .toc-tick { background: #4a4a4a; }
-    .toc .toc-link:hover .toc-tick { background: #8c8c8c; }
+  /* The panel behind the ticks and titles. It covers the note with a blurred glass so the text
+     underneath fades back instead of fighting the titles. */
+  .toc::before {
+    content: '';
+    position: absolute;
+    z-index: -1;
+    top: -10px;
+    bottom: -10px;
+    left: -14px;
+    width: 280px;
+    border-radius: 12px;
+    background: rgba(20, 20, 20, 0.82);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.07), 0 16px 40px rgba(0, 0, 0, 0.45);
+    -webkit-backdrop-filter: blur(14px);
+    backdrop-filter: blur(14px);
+    transform-origin: 0 0;
+    visibility: hidden;
+    opacity: 0;
+    transform: translateX(-4px) scale(0.98);
+    transition: opacity 160ms ease-out, transform 240ms cubic-bezier(0.22, 1, 0.36, 1), visibility 0s 240ms;
+  }
+
+  /* Open: the panel settles first, then the titles follow, as the kit's accordion does. A short
+     delay keeps a pointer passing over the ticks from flashing it. Closing has no delay. */
+  .toc:is(:hover, :has(:focus-visible))::before {
+    visibility: visible;
+    opacity: 1;
+    transform: none;
+    transition-delay: 60ms, 60ms, 0s;
+  }
+  .toc:is(:hover, :has(:focus-visible)) .toc-label {
+    visibility: visible;
+    opacity: 1;
+    transform: none;
+    transition-delay: 0s, 120ms, 120ms, 0s;
   }
 
   /* One marker moves between ticks rather than each tick lighting up. It mounts in place (no
@@ -154,33 +198,66 @@ const tocBase = Math.min(...toc.map((h) => h.depth));
     });
   }
 
-  // Highlight the section being read in "On this page" and glide the marker to its tick
+  // "On this page": highlight the section being read, glide the marker to its tick, keep that tick
+  // in view when the list is taller than the screen, and smooth-scroll on click.
   const toc = document.querySelector<HTMLElement>('[data-toc]');
+  const scroller = toc?.closest<HTMLElement>('.toc-scroller');
+  const marker = toc?.querySelector<HTMLElement>('.toc-marker');
   const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-toc] .toc-link')];
   const targets = links.map((link) => document.getElementById(decodeURIComponent(link.hash.slice(1))));
-  const marker = toc?.querySelector<HTMLElement>('.toc-marker');
+  const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)');
   let frame = 0;
   let current = -1;
+  let locked = false; // while a click's smooth scroll runs, keep the clicked section active
+
   const place = () => {
     const tick = links[current]?.querySelector<HTMLElement>('.toc-tick');
-    if (!toc || !marker || !tick || !tick.offsetWidth) return; // hidden below xl
-    const y = tick.getBoundingClientRect().top - toc.getBoundingClientRect().top;
-    marker.style.transform = `translateY(${y}px)`;
+    if (!toc || !scroller || !marker || !tick || !tick.offsetWidth) return; // hidden below xl
+    const tickBox = tick.getBoundingClientRect();
+    marker.style.transform = `translateY(${tickBox.top - toc.getBoundingClientRect().top}px)`;
     marker.style.width = `${tick.offsetWidth}px`;
+    const ready = marker.classList.contains('is-ready');
     if (!marker.classList.contains('is-placed')) {
       marker.classList.add('is-placed');
       requestAnimationFrame(() => requestAnimationFrame(() => marker.classList.add('is-ready')));
     }
+    // Long lists: keep the current tick near the middle rather than at the edge or out of sight
+    if (scroller.scrollHeight > scroller.clientHeight) {
+      const y = tickBox.top - scroller.getBoundingClientRect().top + scroller.scrollTop;
+      scroller.scrollTo({ top: y - scroller.clientHeight / 2, behavior: ready && !reduceMotion.matches ? 'smooth' : 'instant' });
+    }
   };
-  const spy = () => {
-    frame = 0;
-    let next = 0;
-    targets.forEach((el, i) => el && el.getBoundingClientRect().top < 120 && (next = i));
-    if (next === current) return;
-    current = next;
+  const activate = (index: number) => {
+    if (index === current) return;
+    current = index;
     links.forEach((link, i) => link.classList.toggle('is-active', i === current));
     place();
   };
+  const spy = () => {
+    frame = 0;
+    if (locked) return;
+    let next = 0;
+    targets.forEach((el, i) => el && el.getBoundingClientRect().top < 120 && (next = i));
+    activate(next);
+  };
+
+  links.forEach((link, i) =>
+    link.addEventListener('click', (event) => {
+      const target = targets[i];
+      if (!target) return;
+      event.preventDefault();
+      history.pushState(null, '', link.hash);
+      activate(i);
+      locked = true;
+      // Hand back to the scroll spy once the scroll settles. It only re-reads on the next scroll, so a
+      // section near the page bottom that can't reach the top stays active after its click.
+      const unlock = () => (locked = false);
+      addEventListener('scrollend', unlock, { once: true });
+      setTimeout(unlock, 1500); // no scrollend when the page is already there, or in older browsers
+      target.scrollIntoView({ behavior: reduceMotion.matches ? 'auto' : 'smooth', block: 'start' });
+    }),
+  );
+
   if (links.length) {
     addEventListener('scroll', () => (frame ||= requestAnimationFrame(spy)), { passive: true });
     // Fonts and the xl breakpoint can move the ticks, so re-measure without changing the section

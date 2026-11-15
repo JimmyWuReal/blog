@@ -54,3 +54,7 @@
 /* Math */
 .note .katex { font-size: 1.1em; color: #e6e6e6; }
 .note .katex-display { overflow-x: auto; overflow-y: hidden; padding: 4px 0; }
+
+/* Horizontal scrollers inside the note still scroll, without a visible scrollbar */
+.note :is(pre, table, .katex-display) { scrollbar-width: none; }
+.note :is(pre, table, .katex-display)::-webkit-scrollbar { display: none; }
