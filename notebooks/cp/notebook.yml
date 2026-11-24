@@ -15,6 +15,10 @@ sections:
       - basics/input
       - basics/complexity
 
+  - section: STL
+    notes:
+      - stl/vector
+
   - section: Math
     notes:
       - math/fast-power
