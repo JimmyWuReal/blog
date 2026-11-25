@@ -1,7 +1,8 @@
 ---
 // The nav bar on every page, stuck to the top while scrolling. It spans the same 1120px column
 // as the page below it. On the home, tag, and 404 pages it shows the site name; elsewhere a
-// back button and a breadcrumb such as "Competitive Programming / Hello World!".
+// back button and a breadcrumb such as "Competitive Programming / Hello World!". Views comes right
+// after the site name, or on the right of a breadcrumb.
 interface Props {
   /** Where the back button goes. Omit for the site-name header. */
   back?: string;
@@ -12,6 +13,8 @@ interface Props {
 }
 
 const { back, latest, crumbs = [] } = Astro.props;
+// The pathname is /views in dev and /views.html in the build.
+const onViews = /^\/views(?:\.html)?$/.test(Astro.url.pathname);
 ---
 
 <!-- The top margin scrolls away, so the bar sits 32px down at first and flush once stuck. -->
@@ -44,18 +47,27 @@ const { back, latest, crumbs = [] } = Astro.props;
           </ol>
         </nav>
       ) : (
-        <>
-          <a href="/" class="text-[15px] leading-[28px] font-semibold tracking-[-0.035em] text-[#efefef] no-underline">Blogs</a>
-          <span class="text-[13px] font-medium tracking-[-0.01em] text-[#8a8a8a]">By Jimmy Wu</span>
-        </>
+        <div class="flex items-center gap-5 text-[15px] leading-[28px] font-semibold tracking-[-0.035em]">
+          <a href="/" class="text-[#efefef] no-underline">Blogs</a>
+          <a href="/views" class="nav-link no-underline" aria-current={onViews ? 'page' : undefined}>Views</a>
+        </div>
       )
     }
+    <div class="shrink-0 text-[13px] leading-[28px] font-medium tracking-[-0.01em] text-[#8a8a8a]">
+      {back ? <a href="/views" class="nav-link no-underline">Views</a> : 'By Jimmy Wu'}
+    </div>
   </div>
 </header>
 
 <style>
   .crumb-link { transition: color 180ms ease-out; }
+  .nav-link { position: relative; color: #8a8a8a; transition: color 180ms ease-out; }
+  .nav-link:hover, .nav-link[aria-current] { color: #efefef; }
   .crumb-link:hover,
   nav:has(.nav-back:hover) .nav-parent { color: #efefef; }
   nav:has(.nav-parent:hover) .nav-back { color: #fff; }
+  /* A 44px target for fingers, around the same text. */
+  @media (pointer: coarse) {
+    .nav-link::after { content: ''; position: absolute; inset: 50% auto auto 50%; width: max(100%, 44px); height: 44px; transform: translate(-50%, -50%); }
+  }
 </style>

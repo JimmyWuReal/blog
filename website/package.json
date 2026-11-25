@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "test": "node --test 'src/**/*.test.ts'"
   },
   "engines": {
     "node": "^24.0.0 || ^26.0.0"

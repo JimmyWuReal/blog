@@ -1,0 +1,92 @@
+---
+// Charts of views over the last 30 days: each day's, and the all-time total as it counts up.
+// They cover every post and note, and are drawn in the browser from Convex's views:daily.
+import Listing from '../layouts/Listing.astro';
+
+const convexUrl = import.meta.env.CONVEX_URL;
+---
+
+<Listing title="Views">
+  <h1 class="m-0 text-[32px] leading-[1.15] font-medium tracking-[-0.045em] sm:text-[36px]">Views</h1>
+  <div id="charts" class="mt-8 grid grid-cols-1 gap-4 sm:gap-5 lg:grid-cols-2" data-convex={convexUrl} hidden={!convexUrl}>
+    {
+      [
+        { chart: 'daily', title: 'Views per day' },
+        { chart: 'total', title: 'Total views' },
+      ].map(({ chart, title }) => (
+        <section class="chart flex min-w-0 flex-col gap-5 rounded-2xl bg-[#111] p-5">
+          <div class="flex items-center justify-between gap-5">
+            <h2 class="m-0 text-[13px] font-medium tracking-[-0.01em]">{title}</h2>
+            {chart === 'total' && <span id="total" class="font-[DM_Mono,ui-monospace,monospace] text-[11px] leading-none text-[#d6d6d6] tabular-nums" />}
+          </div>
+          <div class="chart-plot" data-chart={chart} aria-label={title} />
+        </section>
+      ))
+    }
+  </div>
+  <p id="message" role="status" class="m-0 mt-8 text-[15px] text-[#9a9a9a]" hidden={!!convexUrl}>View counts aren't available.</p>
+</Listing>
+
+<script>
+  import { drawChart } from '../lib/chart';
+  import { taipeiDay, toPoints, type DayRow } from '../lib/daily';
+
+  const charts = document.querySelector<HTMLElement>('#charts')!;
+
+  function fail(text: string) {
+    const message = document.querySelector<HTMLElement>('#message')!;
+    charts.hidden = true;
+    message.textContent = text;
+    message.hidden = false;
+  }
+
+  async function load(url: string) {
+    const res = await fetch(`${url}/api/query`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path: 'views:daily', args: {}, format: 'json' }),
+      signal: AbortSignal.timeout(10_000),
+    });
+    const body = await res.json();
+    if (body.status !== 'success') throw new Error(body.errorMessage);
+    const rows: DayRow[] = body.value;
+    if (!rows.length) return fail('No views yet.');
+
+    const points = toPoints(rows, taipeiDay(Date.now()));
+    document.querySelector('#total')!.textContent = rows.at(-1)!.total.toLocaleString('en-US');
+    for (const plot of charts.querySelectorAll<HTMLElement>('.chart-plot')) {
+      const daily = plot.dataset.chart === 'daily';
+      drawChart(plot, points.map(({ day, count, total }) => ({ day, value: daily ? count : total })), daily ? 'bar' : 'line');
+    }
+  }
+
+  const url = charts.dataset.convex;
+  if (url) load(url).catch(() => fail("Couldn't load the view counts. Reload the page to try again."));
+</script>
+
+<style is:global>
+  /* UI kit charts; lib/chart.ts makes the nodes inside .chart-plot. */
+  .chart-plot { position: relative; height: 200px; border-radius: 4px; cursor: default; touch-action: pan-y; }
+  .chart-plot:focus-visible { outline: 2px solid rgba(255, 255, 255, 0.8); outline-offset: 6px; }
+  .chart-plot svg { display: block; overflow: visible; }
+  .chart-grid { stroke: var(--rule); stroke-width: 1; shape-rendering: crispEdges; }
+  .chart-axis { font: 400 10px/1 'DM Mono', ui-monospace, monospace; fill: #848484; font-variant-numeric: tabular-nums; }
+  .chart-bar { fill: #3c3c3c; transform-box: fill-box; transform-origin: bottom; transition: fill 200ms ease; }
+  .chart-bar.is-active { fill: #bdbdbd; }
+  .chart-bar.is-today { fill: #fff; }
+  .chart-line { fill: none; stroke: #fff; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1; }
+  .chart-cross { stroke: var(--line); stroke-width: 1; shape-rendering: crispEdges; }
+  .chart-cross:not(.is-active) { display: none; }
+  .chart-end { fill: #fff; transition: cx 160ms cubic-bezier(0.22, 1, 0.36, 1), cy 160ms cubic-bezier(0.22, 1, 0.36, 1); }
+  /* Only the first drawing animates; redrawing at a new width doesn't. */
+  .is-entering .chart-bar { animation: bar-grow 600ms cubic-bezier(0.22, 1, 0.36, 1) var(--delay) backwards; }
+  .is-entering .chart-line { animation: draw 900ms cubic-bezier(0.65, 0, 0.35, 1) backwards; }
+  .chart-tip { position: absolute; z-index: 3; display: flex; gap: 14px; padding: 9px 10px; border-radius: 8px; color: #a8a8a8; background: #1c1c1c; font: 400 11px/1 'DM Mono', ui-monospace, monospace; white-space: nowrap; pointer-events: none; opacity: 0; }
+  .chart-tip b { font-weight: 400; color: #fff; }
+  .chart-tip.is-active { opacity: 1; }
+  /* The bar chart's tooltip fades and rises; the line chart's is immediate. */
+  .chart-tip.is-bar { translate: 0 4px; transition: opacity 160ms ease-out, translate 200ms cubic-bezier(0.22, 1, 0.36, 1); }
+  .chart-tip.is-bar.is-active { translate: 0 0; }
+  @keyframes bar-grow { from { transform: scaleY(0); } }
+  @keyframes draw { from { stroke-dashoffset: 1; } }
+</style>
