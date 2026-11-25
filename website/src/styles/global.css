@@ -19,7 +19,9 @@
   font-family: var(--font-sans);
   font-synthesis: none;
   color: #fff;
-  background: #090909;
+  /* Chrome on macOS can show a flat color differently on tiles with nothing painted on them, splitting
+     the page in two shades. The one-color gradient makes it paint every tile; so `body` has no background. */
+  background: #090909 linear-gradient(#090909, #090909);
   --rule: #262626;
   --line: rgba(255, 255, 255, 0.18);
   --line-hover: rgba(255, 255, 255, 0.34);
@@ -27,7 +29,7 @@
   --sub: #7d7d7d;
 }
 
-body { margin: 0; background: #090909; -webkit-font-smoothing: antialiased; }
+body { margin: 0; -webkit-font-smoothing: antialiased; }
 
 /* The page still scrolls, without a visible scrollbar */
 html { scrollbar-width: none; }
