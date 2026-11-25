@@ -21,7 +21,7 @@ export const entryUrl = (entry: Entry) => `/${entry.id}`;
 export const viewPath = (entry: Entry) => (isPost(entry) ? `posts/${entry.id}` : entry.id);
 
 // URLs that a post can't take, besides notebook slugs.
-const RESERVED = ['index', '404', 'tags', 'og'];
+const RESERVED = ['index', '404', 'tags', 'og', 'views'];
 
 /** Published posts, newest first with undated posts last. Fails on URL collisions. */
 export async function getPosts() {
