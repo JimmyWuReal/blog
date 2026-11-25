@@ -18,6 +18,7 @@ sections:
   - section: STL
     notes:
       - stl/vector
+      - stl/pair
 
   - section: Math
     notes:
