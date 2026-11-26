@@ -19,6 +19,7 @@ sections:
     notes:
       - stl/vector
       - stl/pair
+      - stl/stack
 
   - section: Math
     notes:
