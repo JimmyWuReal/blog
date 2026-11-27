@@ -19,6 +19,7 @@ sections:
     notes:
       - stl/vector
       - stl/pair
+      - stl/queue
       - stl/stack
 
   - section: Math
